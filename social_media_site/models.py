@@ -30,6 +30,8 @@ class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE,
                              related_name='comments')
     creation_date = models.DateTimeField(auto_now_add=True)
+    text = models.TextField()
+
 
 
 class Like(models.Model):
