@@ -7,8 +7,6 @@ class Profile(models.Model):
                                 on_delete=models.CASCADE)
     date_of_birth = models.DateField(null=True,
                                      blank=True)
-    profile_photo = models.ImageField(upload_to='users/profile_pictures/%Y/%m/%d/',
-                                      blank=True)
     profile_photo = models.ImageField(upload_to='users/profile_photos/%Y/%m/%d/',
                                       blank=True)
     cover_photo = models.ImageField(upload_to='users/cover_photos/%Y/%m/%d/',
@@ -43,8 +41,10 @@ class Like(models.Model):
 
 class PostLike(Like):
     post = models.ForeignKey(Post,
-                             on_delete=models.CASCADE)
+                             on_delete=models.CASCADE,
+                             related_name='likes')
 
 class CommentLike(Like):
     comment = models.ForeignKey(Comment,
-                                on_delete=models.CASCADE)
+                                on_delete=models.CASCADE,
+                                related_name='likes')
