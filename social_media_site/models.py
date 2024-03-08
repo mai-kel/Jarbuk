@@ -11,6 +11,7 @@ class Profile(models.Model):
                                       blank=True)
     cover_photo = models.ImageField(upload_to='users/cover_photos/%Y/%m/%d/',
                                     blank=True)
+    friends = models.ManyToManyField('self', symmetrical=True)
 
 
 class Post(models.Model):
