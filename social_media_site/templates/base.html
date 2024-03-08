@@ -3,6 +3,7 @@
 <html>
     <head>
         <title>{%block title%}{%endblock%}</title>
+        <link href="{% static "css/base.css" %}" rel="stylesheet">
     </head>
 
     <body>
@@ -11,6 +12,13 @@
             <span class="logo">Jarbuk</span>
             {% if request.user.is_authenticated %}
                 <!-- TODO make menu item for logged users (profile, chat etc.) -->
+                <span class="logout">
+                    <form method="post" action="{% url 'site:logout' %}">
+                        {% csrf_token %}
+                        <button type="submit">Logout</button>
+                    </form>
+
+                </span>
             {% endif %}
         </div>
 

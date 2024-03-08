@@ -1,0 +1,40 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+#header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between; /* Added to space items evenly */
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    order: 1; /* Added to control the order in flex layout */
+}
+
+.logout {
+    order: 2; /* Added to control the order in flex layout */
+}
+
+.logout form {
+    margin: 0;
+}
+
+.logout button {
+    color: #fff;
+    background-color: #555;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#content {
+    margin: 20px;
+}
