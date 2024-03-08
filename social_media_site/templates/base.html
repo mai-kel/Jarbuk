@@ -1,0 +1,24 @@
+{%load static%}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{%block title%}{%endblock%}</title>
+    </head>
+
+    <body>
+
+        <div id="header">
+            <span class="logo">Jarbuk</span>
+            {% if request.user.is_authenticated %}
+                <!-- TODO make menu item for logged users (profile, chat etc.) -->
+            {% endif %}
+        </div>
+
+        <div id="content">
+            {% block content %} {% endblock %}
+        </div>
+
+    </body>
+</html>
+
+
