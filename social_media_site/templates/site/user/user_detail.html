@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}User details{% endblock %}
+{% block content %}
+
+<div class="profile_container">
+    <div class="cover_photo_div">
+        {% if user.profile.cover_photo %}
+            <img class="cover_photo" src="{{user.profile.cover_photo.url}}">
+        {% else %}
+            <img class="cover_photo" src="{% static 'default_img/cover_def.png' %}">
+        {% endif %}
+    </div>
+
+    <div class="profile_details_wrapper">
+        <div class="profile_photo_div">
+            {% if user.profile.profile_photo %}
+                <img class="profile_photo" src="{{user.profile.profile_photo.url}}">
+            {% else %}
+                <img class="profile_photo" src="{% static 'default_img/profile_def.png' %}">
+            {% endif %}
+        </div>
+
+        <div class="personal_details">
+            {{ user.first_name }} {{ user.last_name }}
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
