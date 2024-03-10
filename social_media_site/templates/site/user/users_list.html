@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Search for users{% endblock %}
+{% block content %}
+
+    <div class="search_form">
+        <form action="{% url 'site:users_search' %}" method="post">
+            {{form.as_p}}
+            {% csrf_token %}
+            <p><input type="submit" value="Search"></p>
+        </form>
+    </div>
+
+    <div class="users_found">
+        <ul class="users_list">
+        {% for user in users_found %}
+            <li class=user_item>
+                <a href="{% url 'site:user_detail' id=user.pk %}"> {{user.first_name}} {{user.last_name}} </a>
+            </li>
+        {% empty %}
+            {% if form_sent_correctly %}
+                <p>No users found</p>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+
+{% endblock %}
