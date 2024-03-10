@@ -9,9 +9,23 @@
     <body>
 
         <div id="header">
-            <span class="logo">Jarbuk</span>
+            <span class="logo">
+                <a href="{% url 'site:posts_feed'%}">
+                    Jarbuk
+                </a>
+
+            </span>
             {% if request.user.is_authenticated %}
                 <!-- TODO make menu item for logged users (profile, chat etc.) -->
+                <ul class="menu">
+                <li>
+                    <a href="{% url 'site:posts_feed'%}">Posts</a>
+                </li>
+
+                <li>
+                    <a href="{% url 'site:users_search'%}">Search for users</a>
+                </li>
+
                 <span class="logout">
                     <form method="post" action="{% url 'site:logout' %}">
                         {% csrf_token %}
