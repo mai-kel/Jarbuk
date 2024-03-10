@@ -9,17 +9,31 @@ body {
     color: #fff;
     padding: 10px;
     display: flex;
-    justify-content: space-between; /* Added to space items evenly */
+    justify-content: space-between;
+    align-items: center;
 }
 
-.logo {
+.logo a {
+    color: #fff;
+    text-decoration: none;
     font-size: 24px;
     font-weight: bold;
-    order: 1; /* Added to control the order in flex layout */
 }
 
-.logout {
-    order: 2; /* Added to control the order in flex layout */
+.menu {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.menu li {
+    margin-right: 20px;
+}
+
+.menu a {
+    color: #fff;
+    text-decoration: none;
 }
 
 .logout form {
@@ -37,4 +51,149 @@ body {
 
 #content {
     margin: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.login_form {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form p {
+    margin: 10px 0;
+}
+
+
+/* PROFILE */
+.profile_container {
+    max-width: 80%;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cover_photo_div {
+    overflow: hidden;
+    width: 100%;
+}
+
+.cover_photo,
+.profile_photo {
+    width: 100%;
+    max-height: 500px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile_photo_div {
+    float: left;
+}
+
+.profile_photo {
+    width: 200px;
+    height: 200px;
+    border: 5px solid #fff;
+    border-radius: 50%;
+}
+
+.personal_details {
+    width: 100%;
+    float: right;
+    text-align: left;
+    font-size: 50px;
+    font-weight: bold;
+    margin-left: 30px;
+    margin-top: 5%;
+
+}
+
+.profile_details_wrapper {
+    width: 100%;
+    display: flex;
+    margin-top: 20px;
+
+}
+
+
+/* POST */
+.post {
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.post_pp_div {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.post_pp {
+    max-width: 50px;
+    border-radius: 50%;
+}
+
+.post_author_name {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.post_date {
+    color: #888;
+    font-size: 12px;
+}
+
+.post_text {
+    margin: 10px 0;
+}
+
+.post_photo_div {
+    margin-top: 10px;
+}
+
+.post_photo {
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+.like_form,
+.go_to_post_detail {
+    margin-top: 10px;
+}
+
+.like_button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.go_to_post_detail a {
+    color: #428bca;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.go_to_post_detail a:hover {
+    text-decoration: underline;
 }
