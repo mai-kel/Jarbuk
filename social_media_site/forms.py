@@ -25,9 +25,12 @@ class RegistrationForm(forms.Form):
     email = forms.EmailField(label="Email", max_length=50, required=True)
     password = forms.CharField(label='Password', widget=forms.PasswordInput, required=True)
     password2 = forms.CharField(label='Repeat password', widget=forms.PasswordInput, required=True)
-    birthdate = forms.DateField(label="Birth date", required=False)
-    profile_photo = forms.ImageField(label="Profile photo")
-    cover_photo = forms.ImageField(label="Profile photo")
+    birthdate = forms.DateField(label="Date of Birth",
+                                required=False,
+                                widget=forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
+                                input_formats=["%Y-%m-%d"])
+    profile_photo = forms.ImageField(label="Profile photo", required=False)
+    cover_photo = forms.ImageField(label="Cover photo", required=False)
 
     def clean_username(self):
         username = self.cleaned_data["username"]
