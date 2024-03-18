@@ -1,6 +1,5 @@
 from django import forms
-from django.conf import settings
-
+from django.contrib.auth.models import User
 
 class UserForm(forms.Form):
     first_name = forms.CharField(label="First name", max_length=30, required=False)
@@ -33,7 +32,7 @@ class RegistrationForm(forms.Form):
     def clean_username(self):
         username = self.cleaned_data["username"]
 
-        if (settings.AUTH_USER_MODEL.objects.filter(username=username).exists()):
+        if (User.objects.filter(username=username).exists()):
             raise forms.ValidationError("Username already used")
 
         return username
@@ -41,7 +40,7 @@ class RegistrationForm(forms.Form):
     def clean_email(self):
         email = self.cleaned_data["email"]
 
-        if (settings.AUTH_USER_MODEL.objects.filter(email=email).exists()):
+        if (User.objects.filter(email=email).exists()):
             raise forms.ValidationError("Email already used")
 
         return email
