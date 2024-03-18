@@ -3,8 +3,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .models import Post, Profile, PostLike
 from django.db.models import Q
-from .forms import UserForm
+from .forms import UserForm, RegistrationForm
 from django.views.decorators.http import require_GET, require_POST
+
 # Create your views here.
 
 @login_required
@@ -70,6 +71,53 @@ def post_detail(request, id):
 
     return render(request, "site/post/post_detail.html",
                   {"post": post})
+
+
+def register(request):
+    if request.method == 'POST':
+        registration_form = RegistrationForm(request.POST, request.FILES)
+        if registration_form.is_valid():
+            cd = registration_form.cleaned_data
+            username = cd['username']
+            first_name = cd['first_name']
+            last_name = cd['last_name']
+            email = cd['email']
+            password = cd['password']
+            user = User.objects.create_user(username=username,
+                                            first_name=first_name,
+                                            last_name=last_name,
+                                            email=email,
+                                            password=password)
+            profile = Profile.objects.create(user=user)
+
+            birthdate = cd['birthdate']
+            profile_photo = cd['profile_photo']
+            cover_photo = cd['cover_photo']
+
+            if birthdate:
+                profile.date_of_birth = birthdate
+            if profile_photo:
+                profile.profile_photo = profile_photo
+            if cover_photo:
+                profile.cover_photo = cover_photo
+
+            profile.save()
+
+            return render(request,
+                          'registration/registration_complete.html',
+                          {})
+    else:
+        registration_form = RegistrationForm()
+
+    return render(request,
+                  'registration/registration.html',
+                  {'form': registration_form})
+
+
+
+
+
+
 
 
 
