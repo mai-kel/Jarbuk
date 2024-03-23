@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from .models import Post
 
 class UserForm(forms.Form):
     first_name = forms.CharField(label="First name", max_length=30, required=False)
@@ -56,6 +57,27 @@ class RegistrationForm(forms.Form):
             raise forms.ValidationError("Passwords don't match")
 
         return password2
+
+
+class PostCreateForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ["text", "photo"]
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'id': 'post_text',
+                'required': True,
+                'placeholder': 'Write your post...'
+                }
+            ),
+
+            'photo': forms.FileInput(attrs={
+                'id': 'post_photo',
+                'required': False
+                }
+            ),
+        }
+
 
 
 
