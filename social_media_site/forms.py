@@ -77,6 +77,10 @@ class PostCreateForm(forms.ModelForm):
                 }
             ),
         }
+        labels = {
+            'text': '',
+            'photo': 'Attach photo to post'
+        }
 
 
 
