@@ -1,12 +1,26 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Posts{% endblock %}
 {% block content %}
+
+    <div id="post_form_div">
+        <form method="POST" id="post_form" enctype="multipart/form-data">
+            {{post_form.as_p}}
+            {% csrf_token %}
+            <input type="submit" value="Post" id=submit_post>
+        </form>
+    </div>
+
 
     {% for post in posts %}
         <div class="post">
             {% with author=post.author %}
             <div class="post_pp_div">
-                <img class="post_pp" src="{{author.profile.profile_photo.url}}">
+                {% if author.profile.profile_photo %}
+                    <img class="post_pp" src="{{author.profile.profile_photo.url}}">
+                {% else %}
+                    <img class="post_pp" src="{% static 'default_img/profile_def.png' %}">
+                {% endif %}
             </div>
 
             <div class="post_author_name">
@@ -40,5 +54,43 @@
             {% endwith %}
         </div>
     {% endfor %}
+
+{% endblock %}
+
+{%block domready%}
+
+document.querySelector('#post_form').addEventListener('submit', function(event){
+    event.preventDefault();
+
+    const url = '{% url "site:post_create" %}';
+    var options = {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken},
+        mode: 'same-origin'
+    }
+    var post_text = document.querySelector('#post_text');
+    var post_photo = document.querySelector('#post_photo');
+
+    var formData = new FormData();
+    formData.append('text', post_text.value);
+    if (post_photo.files.length > 0){
+        formData.append('post_photo', post_photo.files[0]);
+    }
+
+    options['body'] = formData;
+
+    // send HTTP request
+    fetch(url, options)
+    .then(response => response.json())
+    .then(data => {
+        if (data['status'] === 'ok'){
+
+        }
+    }
+    )
+
+});
+
+
 
 {% endblock %}
