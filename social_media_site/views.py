@@ -29,7 +29,7 @@ def posts_feed(request):
 @ensure_csrf_cookie
 def create_post(request):
     post_text = request.POST.get('text')
-    post_photo = request.FILES['post_photo']
+    post_photo = request.FILES.get('post_photo')
     response_data = {}
 
     post = Post(text=post_text, author=request.user)
@@ -38,7 +38,10 @@ def create_post(request):
 
     post.save()
 
-    return JsonResponse({'status': 'ok'})
+    response_data['status'] = 'ok'
+    response_data['post'] = post.render()
+
+    return JsonResponse(response_data)
 
 
 
