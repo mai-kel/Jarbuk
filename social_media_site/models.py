@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-
+from django.template.loader import render_to_string
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
@@ -22,6 +22,10 @@ class Post(models.Model):
     photo = models.ImageField(upload_to='users/post_photos/%Y/%m/%d/',
                               blank=True)
     text = models.TextField()
+
+    def render(self):
+        return render_to_string('site/post/post_general.html',
+                                 {'post': self})
 
 
 class Comment(models.Model):
