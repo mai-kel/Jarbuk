@@ -3,18 +3,44 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .models import Post, Profile, PostLike
 from django.db.models import Q
-from .forms import UserForm, RegistrationForm
+from .forms import UserForm, RegistrationForm, PostCreateForm
 from django.views.decorators.http import require_GET, require_POST
+from django.http import JsonResponse
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 # Create your views here.
 
+@require_GET
 @login_required
 def posts_feed(request):
     friends = User.objects.filter(profile__in=request.user.profile.friends.all())
-    posts = Post.objects.filter(Q(author__in=friends) | Q(author=request.user)).order_by('creation_date')
+    # retrieving posts created by friends of user in request or created by user himself
+    posts = Post.objects.filter(Q(author__in=friends) | Q(author=request.user)).order_by('-creation_date')
+
+    post_form = PostCreateForm()
+
     return render(request,
                   'site/posts_feed.html',
-                  {'posts': posts})
+                  {'posts': posts,
+                   'post_form': post_form})
+
+@login_required
+@require_POST
+@ensure_csrf_cookie
+def create_post(request):
+    post_text = request.POST.get('text')
+    post_photo = request.FILES['post_photo']
+    response_data = {}
+
+    post = Post(text=post_text, author=request.user)
+    if post_photo:
+        post.photo = post_photo
+
+    post.save()
+
+    return JsonResponse({'status': 'ok'})
+
+
 
 @login_required
 def search_for_users(request):
