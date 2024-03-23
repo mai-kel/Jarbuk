@@ -7,53 +7,15 @@
         <form method="POST" id="post_form" enctype="multipart/form-data">
             {{post_form.as_p}}
             {% csrf_token %}
-            <input type="submit" value="Post" id=submit_post>
+            <input type="submit" value="Create post" id=submit_post>
         </form>
     </div>
 
-
-    {% for post in posts %}
-        <div class="post">
-            {% with author=post.author %}
-            <div class="post_pp_div">
-                {% if author.profile.profile_photo %}
-                    <img class="post_pp" src="{{author.profile.profile_photo.url}}">
-                {% else %}
-                    <img class="post_pp" src="{% static 'default_img/profile_def.png' %}">
-                {% endif %}
-            </div>
-
-            <div class="post_author_name">
-                {{author.first_name}} {{author.last_name}}
-            </div>
-
-            <div class="post_date">
-                {{ post.creation_date|date:"d-m-Y"}}
-            </div>
-
-            <div class="post_text">
-                {{post.text|linebreaks}}
-            </div>
-
-            {% if post.photo %}
-                <div class="post_photo_div">
-                    <img class="post_photo" src={{post.photo.url}}>
-                </div>
-            {% endif %}
-
-            <div class="like_form">
-                <form action="{% url 'site:post_like' id=post.pk %}" method=post>
-                    {% csrf_token %}
-                    <p><input class="like_button" type="submit" value="Like"></p>
-                </form>
-            </div>
-
-            <div class="go_to_post_detail">
-                <a href="{% url 'site:post_detail' id=post.pk %}"> Post discussion </a>
-            </div>
-            {% endwith %}
-        </div>
-    {% endfor %}
+    <div id=posts>
+        {% for post in posts %}
+            {{post.render}}
+        {% endfor %}
+    </div>
 
 {% endblock %}
 
@@ -77,6 +39,8 @@ document.querySelector('#post_form').addEventListener('submit', function(event){
         formData.append('post_photo', post_photo.files[0]);
     }
 
+    var posts_div = document.querySelector('#posts');
+
     options['body'] = formData;
 
     // send HTTP request
@@ -84,7 +48,21 @@ document.querySelector('#post_form').addEventListener('submit', function(event){
     .then(response => response.json())
     .then(data => {
         if (data['status'] === 'ok'){
+            // clear file input
+            var newInput = document.createElement("input");
 
+            newInput.type = "file";
+            newInput.id = post_photo.id;
+            newInput.name = post_photo.name;
+            newInput.accept = "image/*";
+
+            post_photo.parentNode.replaceChild(newInput, post_photo);
+
+            // clear text input
+            post_text.value = "";
+
+            // add created post to post feed
+            posts_div.innerHTML = data['post'] + posts_div.innerHTML;
         }
     }
     )
