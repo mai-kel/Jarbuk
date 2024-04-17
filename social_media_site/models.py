@@ -55,3 +55,13 @@ class CommentLike(Like):
     comment = models.ForeignKey(Comment,
                                 on_delete=models.CASCADE,
                                 related_name='likes')
+
+
+class FriendInvitation(models.Model):
+    from_who = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                 on_delete=models.CASCADE,
+                                 related_name='invitations_sent')
+    to_who = models.ForeignKey(settings.AUTH_USER_MODEL,
+                               on_delete=models.CASCADE,
+                               related_name='invitations_received')
+    date = models.DateTimeField(auto_now_add=True)
