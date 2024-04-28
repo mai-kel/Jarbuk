@@ -23,9 +23,10 @@ class Post(models.Model):
                               blank=True)
     text = models.TextField()
 
-    def render(self):
-        return render_to_string('site/post/post_general.html',
-                                 {'post': self})
+    def render(self, request):
+        return render_to_string(request=request,
+                                template_name='site/post/post_general.html',
+                                context={'post': self})
 
 
 class Comment(models.Model):
