@@ -13,7 +13,46 @@
 
     <div id=posts>
         {% for post in posts %}
-            {{post.render}}
+            <div class="post">
+                {% with author=post.author %}
+                <div class="post_pp_div">
+                    {% if author.profile.profile_photo %}
+                        <img class="post_pp" src="{{author.profile.profile_photo.url}}">
+                    {% else %}
+                        <img class="post_pp" src="{% static 'default_img/profile_def.png' %}">
+                    {% endif %}
+                </div>
+
+                <div class="post_author_name">
+                    {{author.first_name}} {{author.last_name}}
+                </div>
+
+                <div class="post_date">
+                    {{ post.creation_date|date:"d-m-Y"}}
+                </div>
+
+                <div class="post_text">
+                    {{post.text|linebreaks}}
+                </div>
+
+                {% if post.photo %}
+                    <div class="post_photo_div">
+                        <img class="post_photo" src={{post.photo.url}}>
+                    </div>
+                {% endif %}
+
+                <div class="like_form">
+                    <form action="{% url 'site:post_like' id=post.pk %}" method=post>
+                        {% csrf_token %}
+                        <p><input class="like_button" type="submit" value="Like"></p>
+                    </form>
+                </div>
+
+                <div class="go_to_post_detail">
+                    <a href="{% url 'site:post_detail' id=post.pk %}"> Post discussion </a>
+                </div>
+                {% endwith %}
+            </div>
         {% endfor %}
     </div>
 

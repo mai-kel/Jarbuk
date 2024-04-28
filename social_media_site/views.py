@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import Post, Profile, PostLike
+from .models import Post, Profile, PostLike, FriendInvitation
 from django.db.models import Q
 from .forms import UserForm, RegistrationForm, PostCreateForm
 from django.views.decorators.http import require_GET, require_POST
@@ -39,7 +39,7 @@ def create_post(request):
     post.save()
 
     response_data['status'] = 'ok'
-    response_data['post'] = post.render()
+    response_data['post'] = post.render(request)
 
     return JsonResponse(response_data)
 
@@ -78,14 +78,39 @@ def search_for_users(request):
 @login_required
 def user_detail(request, id):
     user = get_object_or_404(User, pk=id)
+    friendship_status = determine_friendship_status(request, id)
     if user.profile in request.user.profile.friends.all():
         user_posts = user.posts
     else:
         user_posts = None
 
     return render(request, "site/user/user_detail.html",
-                  {"user": user,
-                   "user_posts" : user_posts})
+                  {"user_profile": user,
+                   "user_posts": user_posts,
+                   "friendship_status": friendship_status})
+
+
+def determine_friendship_status(request, user_id):
+    if request.user.pk == user_id:
+        return "your_profile"
+    user_recipient = get_object_or_404(User, pk=user_id)
+    logged_user_friends = User.objects.filter(profile__in=request.user.profile.friends.all())
+    logged_user_sent_invitations = request.user.invitations_sent.all()
+    recipient_user_sent_invitations = user_recipient.invitations_sent.all()
+
+    # users are friends already- delete from friends list
+    if user_recipient in logged_user_friends:
+        return "friends"
+    # logged user sent invitation to recipient user- withdraw invitation
+    elif logged_user_sent_invitations.filter(to_who=user_recipient).exists():
+        return "you_sent"
+    # recipient user sent invitation to logged user
+    elif recipient_user_sent_invitations.filter(to_who=request.user):
+        return "sent_to_you"
+    # there is no invitations nor friendship between users- send invitation
+    else:
+        return "none"
+
 
 @login_required
 @require_POST
@@ -93,6 +118,7 @@ def post_like(request, id):
     post = get_object_or_404(Post, pk=id)
     like = PostLike(from_who=request.user, post=post)
     like.save()
+    return JsonResponse({'status': 'ok'})
 
 @login_required
 def post_detail(request, id):
@@ -143,10 +169,42 @@ def register(request):
                   {'form': registration_form})
 
 
+@require_POST
+@login_required
+def friendship_action_profile(request, user_id, accept):
+    friendship_action(request, user_id, accept)
+    return user_detail(request, user_id)
+
+
+@login_required
+def firends_list(request):
+    friends = User.objects.filter(profile__in=request.user.profile.friends.all())
+    return render(request, 'site/friends/friends_list.html',
+                  {'friends': friends})
 
 
 
+def friendship_action(request, user_id, accept=False):
+    if request.user.pk == user_id:
+        return
+    user_recipient = get_object_or_404(User, pk=user_id)
+    logged_user_friends = User.objects.filter(profile__in=request.user.profile.friends.all())
+    logged_user_sent_invitations = request.user.invitations_sent.all()
+    recipient_user_sent_invitations = user_recipient.invitations_sent.all()
 
-
+    # users are friends already- delete from friends list
+    if user_recipient in logged_user_friends:
+        request.user.profile.friends.remove(user_recipient.profile)
+    # logged user sent invitation to recipient user- withdraw invitation
+    elif logged_user_sent_invitations.filter(to_who=user_recipient).exists():
+        logged_user_sent_invitations.filter(to_who=user_recipient).delete()
+    # recipient user sent invitation to logged user
+    elif recipient_user_sent_invitations.filter(to_who=request.user):
+        recipient_user_sent_invitations.filter(to_who=request.user).delete()
+        if accept:
+            request.user.friends.add(user_recipient.profile)
+    # there is no invitations nor friendship between users- send invitation
+    else:
+        FriendInvitation.objects.create(from_who=request.user, to_who=user_recipient)
 
 

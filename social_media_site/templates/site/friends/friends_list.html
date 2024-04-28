@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Friends{% endblock %}
+{% block content %}
+
+<div class="friends_list">
+    {% for friend in friends %}
+        <div class="friend_container">
+            <div class="friend_profile_photo">
+                {% if friend.profile.profile_photo %}
+                    <img class="profile_photo" src="{{friend.profile.profile_photo.url}}">
+                {% else %}
+                    <img class="profile_photo" src="{% static 'default_img/profile_def.png' %}">
+                {% endif %}
+            </div>
+
+            <div class="friend_name">
+                {{friend.first_name}} {{friend.last_name}}
+            </div>
+
+        </div>
+    {% empty %}
+        You have no friends yet.
+    {% endfor %}
+</div>
+
+
+{% endblock %}
