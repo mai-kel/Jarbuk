@@ -26,6 +26,10 @@
                     <a href="{% url 'site:users_search'%}">Search for users</a>
                 </li>
 
+                <li>
+                    <a href="{% url 'site:friends_list'%}">Friends</a>
+                </li>
+
                 <span class="logout">
                     <form method="post" action="{% url 'site:logout' %}">
                         {% csrf_token %}
