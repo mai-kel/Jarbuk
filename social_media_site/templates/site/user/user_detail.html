@@ -28,27 +28,27 @@
         {% if friendship_status != 'your_profile' %}
         <div class="friendship_status">
             {% if friendship_status == 'friends' %}
-                <form action="{% url 'site:friendship_action_profile' user_id=user_profile.pk accept=0 %}" method="post">
+                <form action="{% url 'site:profile_friendship_delete' id=user_profile.pk %}" method="post">
                     {% csrf_token %}
                     <p><input type="submit" value="Delete from friends"></p>
                 </form>
             {% elif friendship_status == 'you_sent'%}
-                <form action="{% url 'site:friendship_action_profile' user_id=user_profile.pk accept=0 %}" method="post">
+                <form action="{% url 'site:profile_friendship_withdraw' id=user_profile.pk %}" method="post">
                     {% csrf_token %}
                     <p><input type="submit" value="Withdraw friendship invitation"></p>
                 </form>
             {% elif friendship_status == 'sent_to_you' %}
-                <form action="{% url 'site:friendship_action_profile' user_id=user_profile.pk accept=1 %}" method="post">
+                <form action="{% url 'site:profile_friendship_accept' id=user_profile.pk %}" method="post">
                     {% csrf_token %}
                     <p><input type="submit" value="Accept friendship invitation"></p>
                 </form>
 
-                <form action="{% url 'site:friendship_action_profile' user_id=user_profile.pk accept=0 %}" method="post">
+                <form action="{% url 'site:profile_friendship_decline' id=user_profile.pk %}" method="post">
                     {% csrf_token %}
                     <p><input type="submit" value="Decline friendship invitation"></p>
                 </form>
             {% else %}
-                <form action="{% url 'site:friendship_action_profile' user_id=user_profile.pk accept=0 %}" method="post">
+                <form action="{% url 'site:profile_friendship_send' id=user_profile.pk %}" method="post">
                     {% csrf_token %}
                     <p><input type="submit" value="Invite to friends"></p>
                 </form>

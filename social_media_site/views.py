@@ -169,11 +169,113 @@ def register(request):
                   {'form': registration_form})
 
 
+
 @require_POST
 @login_required
-def friendship_action_profile(request, user_id, accept):
-    friendship_action(request, user_id, accept)
-    return user_detail(request, user_id)
+def profile_send_invitation(request, id):
+    user_recipient = get_object_or_404(User, pk=id)
+    logged_user_friends = User.objects.filter(profile__in=request.user.profile.friends.all())
+    logged_user_sent_invitations = request.user.invitations_sent.all()
+    recipient_user_sent_invitations = user_recipient.invitations_sent.all()
+
+    # logged user tries to invite himself
+    if request.user.pk == id:
+       # TODO implement appropriate message
+       pass
+    # users are friends already
+    elif user_recipient in logged_user_friends:
+        # TODO implement appropriate message
+        pass
+    # logged user had already sent invitation to recipient user
+    elif logged_user_sent_invitations.filter(to_who=user_recipient).exists():
+        # TODO implement appropriate message
+        pass
+    # recipient user had already sent invitation to logged user
+    elif recipient_user_sent_invitations.filter(to_who=request.user):
+        # TODO implement appropriate message
+        pass
+    # there is no invitations nor friendship between users- send invitation
+    else:
+        FriendInvitation.objects.create(from_who=request.user, to_who=user_recipient)
+
+    return user_detail(request, id)
+
+
+@require_POST
+@login_required
+def profile_withdraw_invitation(request, id):
+    user_recipient = get_object_or_404(User, pk=id)
+    logged_user_sent_invitations = request.user.invitations_sent.all()
+
+    # recipient user had already sent invitation to logged user
+    if logged_user_sent_invitations.filter(to_who=user_recipient).exists():
+        logged_user_sent_invitations.filter(to_who=user_recipient).delete()
+    # there is no invitation to withdraw
+    else:
+        # TODO implement appropriate message
+        pass
+
+    return user_detail(request, id)
+
+
+@require_POST
+@login_required
+def profile_accept_invitation(request, id):
+    user_recipient = get_object_or_404(User, pk=id)
+    recipient_user_sent_invitations = user_recipient.invitations_sent.all()
+
+    # recipient user had already sent invitation to logged user
+    if recipient_user_sent_invitations.filter(to_who=request.user).exists():
+        recipient_user_sent_invitations.filter(to_who=request.user).delete()
+        request.user.profile.friends.add(user_recipient.profile)
+    # there is no invitation to accept
+    else:
+        # TODO implement appropriate message
+        pass
+
+    return user_detail(request, id)
+
+
+@require_POST
+@login_required
+def profile_decline_invitation(request, id):
+    user_recipient = get_object_or_404(User, pk=id)
+    recipient_user_sent_invitations = user_recipient.invitations_sent.all()
+
+    # recipient user had already sent invitation to logged user
+    if recipient_user_sent_invitations.filter(to_who=request.user).exists():
+        recipient_user_sent_invitations.filter(to_who=request.user).delete()
+    # there is no invitation to accept
+    else:
+        # TODO implement appropriate message
+        pass
+
+    return user_detail(request, id)
+
+
+@require_POST
+@login_required
+def profile_delete_friend(request, id):
+    user_recipient = get_object_or_404(User, pk=id)
+    logged_user_friends = User.objects.filter(profile__in=request.user.profile.friends.all())
+
+    # users are friends already
+    if user_recipient in logged_user_friends:
+        request.user.profile.friends.remove(user_recipient.profile)
+    # users are no longer friends
+    else:
+        # TODO implement appropriate message
+        pass
+
+    return user_detail(request, id)
+
+
+@require_POST
+@login_required
+def delete_friend_friendslist(request, user_id):
+    user_recipient = get_object_or_404(User, pk=user_id)
+    request.user.profile.friends.remove(user_recipient.profile)
+    return firends_list(request)
 
 
 @login_required
@@ -199,7 +301,7 @@ def friendship_action(request, user_id, accept=False):
     elif logged_user_sent_invitations.filter(to_who=user_recipient).exists():
         logged_user_sent_invitations.filter(to_who=user_recipient).delete()
     # recipient user sent invitation to logged user
-    elif recipient_user_sent_invitations.filter(to_who=request.user):
+    elif recipient_user_sent_invitations.filter(to_who=request.user).exists():
         recipient_user_sent_invitations.filter(to_who=request.user).delete()
         if accept:
             request.user.friends.add(user_recipient.profile)
