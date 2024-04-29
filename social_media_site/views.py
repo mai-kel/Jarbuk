@@ -272,14 +272,22 @@ def profile_delete_friend(request, id):
 
 @require_POST
 @login_required
-def delete_friend_friendslist(request, user_id):
-    user_recipient = get_object_or_404(User, pk=user_id)
-    request.user.profile.friends.remove(user_recipient.profile)
-    return firends_list(request)
+def delete_friend_friendslist(request, id):
+    user_recipient = get_object_or_404(User, pk=id)
+    logged_user_friends = User.objects.filter(profile__in=request.user.profile.friends.all())
+
+    # users are friends already
+    if user_recipient in logged_user_friends:
+        request.user.profile.friends.remove(user_recipient.profile)
+    # users are no longer friends
+    else:
+        # TODO implement appropriate message
+        pass
+    return friends_list(request)
 
 
 @login_required
-def firends_list(request):
+def friends_list(request):
     friends = User.objects.filter(profile__in=request.user.profile.friends.all())
     return render(request, 'site/friends/friends_list.html',
                   {'friends': friends})
