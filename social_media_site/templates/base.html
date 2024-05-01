@@ -30,6 +30,14 @@
                     <a href="{% url 'site:friends_list'%}">Friends</a>
                 </li>
 
+                <li>
+                    <a href="{% url 'site:invitations_received'%}">Invitations received</a>
+                </li>
+
+                <li>
+                    <a href="{% url 'site:invitations_sent'%}">Invitations sent</a>
+                </li>
+
                 <span class="logout">
                     <form method="post" action="{% url 'site:logout' %}">
                         {% csrf_token %}
