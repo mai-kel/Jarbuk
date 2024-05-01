@@ -8,7 +8,7 @@
         <div class="friend_container">
             <div class="friend_profile_photo_wrapper">
                 {% if friend.profile.profile_photo %}
-                    <img class="friend_profile_photo" src="{{friend.profile.profile_photo.url}}">
+                    <img class="friend_profile_photo" src="{{friend.profile.profile_photo.url}}" style="max-width: 200px">
                 {% else %}
                     <img class="friend_profile_photo" src="{% static 'default_img/profile_def.png' %}">
                 {% endif %}
