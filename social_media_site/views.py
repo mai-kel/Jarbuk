@@ -293,7 +293,6 @@ def friends_list(request):
                   {'friends': friends})
 
 
-
 def friendship_action(request, user_id, accept=False):
     if request.user.pk == user_id:
         return
@@ -318,3 +317,67 @@ def friendship_action(request, user_id, accept=False):
         FriendInvitation.objects.create(from_who=request.user, to_who=user_recipient)
 
 
+@login_required
+def invitations_sent_list(request):
+    logged_user_sent_invitations = request.user.invitations_sent.all()
+    return render(request, 'site/friends/invitations_sent.html',
+                  {'invitations': logged_user_sent_invitations})
+
+
+@require_POST
+@login_required
+def invitations_sent_withdraw(request, id):
+    user_recipient = get_object_or_404(User, pk=id)
+    logged_user_sent_invitations = request.user.invitations_sent.all()
+
+    # recipient user had already sent invitation to logged user
+    if logged_user_sent_invitations.filter(to_who=user_recipient).exists():
+        logged_user_sent_invitations.filter(to_who=user_recipient).delete()
+    # there is no invitation to withdraw
+    else:
+        # TODO implement appropriate message
+        pass
+
+    return invitations_sent_list(request)
+
+
+@login_required
+def invitations_received_list(request):
+    invitations_received = FriendInvitation.objects.filter(to_who=request.user)
+    return render(request, 'site/friends/invitations_received.html',
+                  {'invitations': invitations_received})
+
+
+@require_POST
+@login_required
+def invitations_received_accept(request, id):
+    sender = get_object_or_404(User, pk=id)
+    sender_invitations = sender.invitations_sent.all()
+
+    # recipient user had already sent invitation to logged user
+    if sender_invitations.filter(to_who=request.user).exists():
+        request.user.profile.friends.add(sender.profile)
+        sender_invitations.filter(to_who=request.user).delete()
+    # there is no invitation to accept
+    else:
+        # TODO implement appropriate message
+        pass
+
+    return invitations_received_list(request)
+
+
+@require_POST
+@login_required
+def invitations_received_decline(request, id):
+    sender = get_object_or_404(User, pk=id)
+    sender_invitations = sender.invitations_sent.all()
+
+    # recipient user had already sent invitation to logged user
+    if sender_invitations.filter(to_who=request.user).exists():
+        sender_invitations.filter(to_who=request.user).delete()
+    # there is no invitation to accept
+    else:
+        # TODO implement appropriate message
+        pass
+
+    return invitations_received_list(request)
