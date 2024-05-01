@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Sent invitations{% endblock %}
+{% block content %}
+
+<div class="invitations_list">
+    {% for invitation in invitations %}
+        {% with invitation_recipient=invitation.to_who %}
+        <div class="recipient_container">
+            <div class="recipient_profile_photo_wrapper">
+                {% if invitation_recipient.profile.profile_photo %}
+                    <img class="user_profile_photo" src="{{invitation_recipient.profile.profile_photo.url}}" style="max-width: 200px">
+                {% else %}
+                    <img class="user_profile_photo" src="{% static 'default_img/profile_def.png' %}">
+                {% endif %}
+            </div>
+
+            <div class="recipient_name">
+                <a href="{% url 'site:user_detail' id=invitation_recipient.pk %}"> {{invitation_recipient.first_name}} {{invitation_recipient.last_name}} </a>
+            </div>
+
+            <div class="withdraw_invitation_container">
+                <form action="{% url 'site:invitations_sent_withdraw' id=invitation_recipient.pk %}" method="post">
+                    {% csrf_token %}
+                    <p><input type="submit" value="Withdraw invitation"></p>
+                </form>
+            </div>
+        </div>
+        {% endwith %}
+    {% empty %}
+        There is no pending invitations.
+    {% endfor %}
+</div>
+
+
+{% endblock %}
