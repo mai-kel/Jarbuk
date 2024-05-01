@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Received invitations{% endblock %}
+{% block content %}
+
+<div class="invitations_list">
+    {% for invitation in invitations %}
+        {% with invitation_sender=invitation.from_who %}
+        <div class="sender_container">
+            <div class="sender_profile_photo_wrapper">
+                {% if invitation_sender.profile.profile_photo %}
+                    <img class="user_profile_photo" src="{{invitation_sender.profile.profile_photo.url}}" style="max-width: 200px">
+                {% else %}
+                    <img class="user_profile_photo" src="{% static 'default_img/profile_def.png' %}">
+                {% endif %}
+            </div>
+
+            <div class="sender_name">
+                <a href="{% url 'site:user_detail' id=invitation_sender.pk %}"> {{invitation_sender.first_name}} {{invitation_sender.last_name}} </a>
+            </div>
+
+            <div class="accept_invitation_container">
+                <form action="{% url 'site:invitations_received_accept' id=invitation_sender.pk %}" method="post">
+                    {% csrf_token %}
+                    <p><input type="submit" value="Accept invitation"></p>
+                </form>
+            </div>
+
+            <div class="decline_invitation_container">
+                <form action="{% url 'site:invitations_received_decline' id=invitation_sender.pk %}" method="post">
+                    {% csrf_token %}
+                    <p><input type="submit" value="Decline invitation"></p>
+                </form>
+            </div>
+        </div>
+        {% endwith %}
+    {% empty %}
+        There is no pending invitations.
+    {% endfor %}
+</div>
+
+
+{% endblock %}
