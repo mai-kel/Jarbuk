@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Post
+from .models import Post, Comment
 
 class UserForm(forms.Form):
     first_name = forms.CharField(label="First name", max_length=30, required=False)
@@ -80,6 +80,23 @@ class PostCreateForm(forms.ModelForm):
         labels = {
             'text': '',
             'photo': 'Attach photo to post'
+        }
+
+
+class CommentCreateForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ["text"]
+        widgets = {
+            'text': forms.Textarea(attrs={
+                'id': 'comment_text',
+                'required': True,
+                'placeholder': 'Write your comment...'
+                }
+            ),
+        }
+        labels = {
+            'text': '',
         }
 
 
