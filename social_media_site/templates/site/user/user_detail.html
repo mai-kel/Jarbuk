@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
+{% load thumbnail %}
 {% block title %}User details{% endblock %}
 {% block content %}
 
 <div class="profile_container">
     <div class="cover_photo_div">
         {% if user_profile.profile.cover_photo %}
-            <img class="cover_photo" src="{{user_profile.profile.cover_photo.url}}">
+            <img class="cover_photo" src="{{user_profile.profile.cover_photo|thumbnail_url:'profile_cp'}}">
         {% else %}
             <img class="cover_photo" src="{% static 'default_img/cover_def.png' %}">
         {% endif %}
@@ -15,7 +16,7 @@
     <div class="profile_details_wrapper">
         <div class="profile_photo_div">
             {% if user_profile.profile.profile_photo %}
-                <img class="profile_photo" src="{{user_profile.profile.profile_photo.url}}">
+                <img class="profile_photo" src="{{ user_profile.profile.profile_photo|thumbnail_url:'profile_pp' }}">
             {% else %}
                 <img class="profile_photo" src="{% static 'default_img/profile_def.png' %}">
             {% endif %}
