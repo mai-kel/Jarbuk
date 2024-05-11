@@ -25,7 +25,7 @@ class Post(models.Model):
 
     def render(self, request):
         return render_to_string(request=request,
-                                template_name='site/post/post_general.html',
+                                template_name='site/general/post_general.html',
                                 context={'post': self})
 
 
@@ -37,6 +37,11 @@ class Comment(models.Model):
                              related_name='comments')
     creation_date = models.DateTimeField(auto_now_add=True)
     text = models.TextField()
+
+    def render(self, request):
+        return render_to_string(request=request,
+                                template_name='site/general/comment_general.html',
+                                context={'comment': self})
 
 
 
