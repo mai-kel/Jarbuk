@@ -1,0 +1,25 @@
+{% load static %}
+
+<div class="comment_container">
+    {% with author=comment.author %}
+    <div class="comment_pp_div">
+        {% if author.profile.profile_photo %}
+            <img class="comment_pp" src="{{author.profile.profile_photo.url}}">
+        {% else %}
+            <img class="comment_pp" src="{% static 'default_img/profile_def.png' %}">
+        {% endif %}
+    </div>
+
+    <div class="comment_author_name">
+        {{author.first_name}} {{author.last_name}}
+    </div>
+
+    <div class="comment_date">
+        {{ comment.creation_date|date:"d-m-Y"}}
+    </div>
+
+    <div class="comment_text">
+        {{comment.text|linebreaks}}
+    </div>
+    {% endwith %}
+</div>
