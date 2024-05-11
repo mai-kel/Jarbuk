@@ -130,3 +130,11 @@ LOGIN_URL = "site:login"
 LOGIN_REDIRECT_URL="site:posts_feed"
 LOGOUT_URL = "site:logout"
 
+THUMBNAIL_ALIASES = {
+    '': {
+        'post_pp': {'size': (50, 0), 'crop': True},
+        'profile_pp': {'size': (0, 200), 'crop': True},
+        'profile_cp': {'size': (1400, 500), 'crop': True},
+
+    },
+}
