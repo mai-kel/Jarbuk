@@ -22,6 +22,7 @@ class Post(models.Model):
     photo = models.ImageField(upload_to='users/post_photos/%Y/%m/%d/',
                               blank=True)
     text = models.TextField()
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='posts_liked')
 
     def render(self, request):
         return render_to_string(request=request,
@@ -37,30 +38,12 @@ class Comment(models.Model):
                              related_name='comments')
     creation_date = models.DateTimeField(auto_now_add=True)
     text = models.TextField()
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='comments_liked')
 
     def render(self, request):
         return render_to_string(request=request,
                                 template_name='site/general/comment_general.html',
                                 context={'comment': self})
-
-
-
-class Like(models.Model):
-    creation_date = models.DateTimeField(auto_now_add=True)
-    from_who = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                 on_delete=models.CASCADE)
-    class Meta:
-        abstract = True
-
-class PostLike(Like):
-    post = models.ForeignKey(Post,
-                             on_delete=models.CASCADE,
-                             related_name='likes')
-
-class CommentLike(Like):
-    comment = models.ForeignKey(Comment,
-                                on_delete=models.CASCADE,
-                                related_name='likes')
 
 
 class FriendInvitation(models.Model):

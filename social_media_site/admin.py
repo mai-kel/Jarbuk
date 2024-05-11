@@ -1,34 +1,29 @@
 from django.contrib import admin
-from .models import Comment, Profile, PostLike, CommentLike, Post
+from .models import Comment, Profile, Post
+from django.contrib.auth.models import User
 
 
 class CommentInline(admin.TabularInline):
     model=Comment
 
-class CommentLiketInline(admin.TabularInline):
-    model=CommentLike
+class PostLikesInline(admin.TabularInline):
+    model = Post.likes.through
 
-class PostLikeInline(admin.TabularInline):
-    model=PostLike
+class CommentLikesInline(admin.TabularInline):
+    model = Comment.likes.through
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = ['author', 'creation_date', 'text']
-    inlines=[CommentInline, PostLikeInline]
+    inlines = [CommentInline, PostLikesInline]
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ['author', 'creation_date', 'text']
-    inlines = [CommentLiketInline]
-
-@admin.register(PostLike)
-class PostLike(admin.ModelAdmin):
-    list_display = ['creation_date', 'from_who', 'post']
-
-@admin.register(CommentLike)
-class PostLike(admin.ModelAdmin):
-    list_display = ['creation_date', 'from_who', 'comment']
+    inlines = [CommentLikesInline]
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ['user', 'date_of_birth', 'profile_photo', 'cover_photo']
+
+

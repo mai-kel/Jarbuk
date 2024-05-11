@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import Post, Profile, PostLike, FriendInvitation, Comment
+from .models import Post, Profile, FriendInvitation, Comment
 from django.db.models import Q
 from .forms import UserForm, RegistrationForm, PostCreateForm, CommentCreateForm
 from django.views.decorators.http import require_GET, require_POST
@@ -115,9 +115,12 @@ def determine_friendship_status(request, user_id):
 @login_required
 @require_POST
 def post_like(request, id):
-    post = get_object_or_404(Post, pk=id)
-    like = PostLike(from_who=request.user, post=post)
-    like.save()
+    # post = get_object_or_404(Post, pk=id)
+    # if PostLike.objects.filter(from_who=request.user, post=post).exists():
+    #     PostLike.objects.filter(from_who=request.user, post=post).delete()
+    # else:
+    #     like = PostLike(from_who=request.user, post=post)
+    #     like.save()
     return JsonResponse({'status': 'ok'})
 
 
