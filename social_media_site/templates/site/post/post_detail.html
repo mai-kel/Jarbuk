@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load thumbnail %}
+{% block title %}Post details{% endblock %}
+{% block content %}
+
+<div class="post_with_comments">
+
+    <div class="post">
+        {% with author=post.author %}
+        <div class="post_pp_div">
+            {% if author.profile.profile_photo %}
+                <img class="post_pp" src="{{author.profile.profile_photo.url}}">
+            {% else %}
+                <img class="post_pp" src="{% static 'default_img/profile_def.png' %}">
+            {% endif %}
+        </div>
+
+        <div class="post_author_name">
+            {{author.first_name}} {{author.last_name}}
+        </div>
+
+        <div class="post_date">
+            {{ post.creation_date|date:"d-m-Y"}}
+        </div>
+
+        <div class="post_text">
+            {{post.text|linebreaks}}
+        </div>
+
+        {% if post.photo %}
+            <div class="post_photo_div">
+                <img class="post_photo" src={{post.photo.url}}>
+            </div>
+        {% endif %}
+
+        <div class="like_form">
+            <form action="{% url 'site:post_like' id=post.pk %}" method=post>
+                {% csrf_token %}
+                <p><input class="like_button" type="submit" value="Like"></p>
+            </form>
+        </div>
+
+        {% endwith %}
+    </div>
+
+    <div class="comment_form_container">
+        <form method="POST" id=comment_form>
+            {{form.as_p}}
+            {% csrf_token %}
+            <input type="submit" value="Create comment" id=submit_comment>
+        </form>
+    </div>
+
+    <div id="comments">
+        {% for comment in comments %}
+            <div class="comment_container">
+                {% with author=comment.author %}
+                <div class="comment_pp_div">
+                    {% if author.profile.profile_photo %}
+                        <img class="comment_pp" src="{{author.profile.profile_photo.url}}">
+                    {% else %}
+                        <img class="comment_pp" src="{% static 'default_img/profile_def.png' %}">
+                    {% endif %}
+                </div>
+
+                <div class="comment_author_name">
+                    {{author.first_name}} {{author.last_name}}
+                </div>
+
+                <div class="comment_date">
+                    {{ comment.creation_date|date:"d-m-Y"}}
+                </div>
+
+                <div class="comment_text">
+                    {{comment.text|linebreaks}}
+                </div>
+                {% endwith %}
+            </div>
+        {% empty %}
+            There are no comments yet.
+        {% endfor %}
+
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{%block domready%}
+
+
+document.querySelector('#comment_form').addEventListener('submit', function(event){
+    event.preventDefault();
+
+    const url = '{% url "site:create_comment" id=post.pk %}';
+    var options = {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken},
+        mode: 'same-origin'
+    }
+    var comment_text = document.querySelector('#comment_text');
+
+    var formData = new FormData();
+    formData.append('text', comment_text.value);
+    var comments_div = document.querySelector('#comments');
+
+    options['body'] = formData;
+
+    // send HTTP request
+    fetch(url, options)
+    .then(response => response.json())
+    .then(data => {
+        // clear text input
+        comment_text.value = "";
+        if (data['status'] === 'ok'){
+            // add created comment to comments section
+            comments_div.innerHTML = data['comment'] + comments_div.innerHTML;
+        }
+    }
+    )
+
+});
+
+
+{% endblock %}
