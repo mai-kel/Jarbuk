@@ -1,9 +1,9 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import Post, Profile, PostLike, FriendInvitation
+from .models import Post, Profile, PostLike, FriendInvitation, Comment
 from django.db.models import Q
-from .forms import UserForm, RegistrationForm, PostCreateForm
+from .forms import UserForm, RegistrationForm, PostCreateForm, CommentCreateForm
 from django.views.decorators.http import require_GET, require_POST
 from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -120,12 +120,36 @@ def post_like(request, id):
     like.save()
     return JsonResponse({'status': 'ok'})
 
+
 @login_required
 def post_detail(request, id):
     post = get_object_or_404(Post, pk=id)
+    comment_form = CommentCreateForm()
+    comments = post.comments.all().order_by('-creation_date')
 
     return render(request, "site/post/post_detail.html",
-                  {"post": post})
+                  {"post": post,
+                   "comments": comments,
+                   "form": comment_form})
+
+
+@login_required
+@require_POST
+def create_comment(request, id):
+    post = get_object_or_404(Post, pk=id)
+    if  request.user.profile not in post.author.profile.friends.all():
+        # TODO message
+        return
+
+    comment_text = request.POST.get('text')
+    new_comment = Comment(text=comment_text, post=post, author=request.user)
+    new_comment.save()
+
+    response_data = {}
+    response_data['status'] = 'ok'
+    response_data['comment'] = new_comment.render(request)
+
+    return JsonResponse(response_data)
 
 
 def register(request):
