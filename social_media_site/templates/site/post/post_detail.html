@@ -6,11 +6,11 @@
 
 <div class="post_with_comments">
 
-    <div class="post">
+    <div class="post" data-postid="{{post.pk}}">
         {% with author=post.author %}
         <div class="post_pp_div">
             {% if author.profile.profile_photo %}
-                <img class="post_pp" src="{{author.profile.profile_photo.url}}">
+                <img class="post_pp" src="{{ author.profile.profile_photo|thumbnail_url:'post_pp' }}">
             {% else %}
                 <img class="post_pp" src="{% static 'default_img/profile_def.png' %}">
             {% endif %}
@@ -34,11 +34,26 @@
             </div>
         {% endif %}
 
-        <div class="like_form">
-            <form action="{% url 'site:post_like' id=post.pk %}" method=post>
+        <div class="post_likes">
+            {% with likes=post.likes.count %}
+            <span class="likes_count"> {{likes}} </span>
+            <span class="likes_description"> likes </span>
+            {% endwith %}
+        </div>
+
+        <div class="like_form_div">
+            <form id="post_like_form" method="POST" data-postid="{{post.pk}}">
                 {% csrf_token %}
-                <p><input class="like_button" type="submit" value="Like"></p>
+                {% if request.user in post.likes.all %}
+                    <p><input class="like_button" type="submit" value="Unlike"></p>
+                {% else %}
+                    <p><input class="like_button" type="submit" value="Like"></p>
+                {% endif %}
             </form>
+        </div>
+
+        <div class="go_to_post_detail">
+            <a href="{% url 'site:post_detail' id=post.pk %}"> Post discussion </a>
         </div>
 
         {% endwith %}
@@ -54,11 +69,11 @@
 
     <div id="comments">
         {% for comment in comments %}
-            <div class="comment_container">
+            <div class="comment_container" data-commentid="{{comment.pk}}">
                 {% with author=comment.author %}
                 <div class="comment_pp_div">
                     {% if author.profile.profile_photo %}
-                        <img class="comment_pp" src="{{author.profile.profile_photo.url}}">
+                        <img class="comment_pp" src="{{author.profile.profile_photo|thumbnail_url:'post_pp'}}">
                     {% else %}
                         <img class="comment_pp" src="{% static 'default_img/profile_def.png' %}">
                     {% endif %}
@@ -75,21 +90,117 @@
                 <div class="comment_text">
                     {{comment.text|linebreaks}}
                 </div>
+
+                <div class="comment_likes">
+                    {% with likes=comment.likes.count %}
+                    <span class="likes_count"> {{likes}} </span>
+                    <span class="likes_description"> likes </span>
+                    {% endwith %}
+                </div>
+
+                <div class="like_form_div">
+                    <form id="comment_like_form" method="POST" data-commentid="{{comment.pk}}">
+                        {% csrf_token %}
+                        {% if request.user in comment.likes.all %}
+                            <p><input class="like_button" type="submit" value="Unlike"></p>
+                        {% else %}
+                            <p><input class="like_button" type="submit" value="Like"></p>
+                        {% endif %}
+                    </form>
+                </div>
+
                 {% endwith %}
             </div>
         {% empty %}
-            There are no comments yet.
+            <div id='no_comments'>
+                There are no comments yet.
+            </div>
         {% endfor %}
-
-
     </div>
-
 </div>
 
 {% endblock %}
 
 
 {%block domready%}
+
+
+function like_comment(event){
+    event.preventDefault();
+    var comment_pk = event.target.getAttribute('data-commentid');
+    const url = '{% url "site:comment_like" %}'
+    var options = {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken},
+        mode: 'same-origin'
+    }
+    var formData = new FormData();
+    formData.append('id', comment_pk)
+    options['body'] = formData;
+
+    // send HTTP request
+    fetch(url, options)
+    .then(response => response.json())
+    .then(data => {
+        if (data['status'] == 'ok'){
+            var comment_div = document.querySelector('div[class="comment_container"][data-commentid="'+CSS.escape(comment_pk)+'"]');
+            var likes_count_span = comment_div.querySelector('span[class="likes_count"]');
+            var like_button = comment_div.querySelector('input[class="like_button"]');
+
+            if (data['action'] == 'liked'){
+                var likes_count = parseInt(likes_count_span.innerHTML);
+                likes_count_span.innerHTML = likes_count + 1;
+                like_button.setAttribute("value", "Unlike")
+            } else{
+                var likes_count = parseInt(likes_count_span.innerHTML);
+                likes_count_span.innerHTML = likes_count - 1;
+                like_button.setAttribute("value", "Like")
+            }
+        }
+    }
+    )
+}
+
+document.querySelectorAll('#comment_like_form').forEach(element => element.addEventListener('submit', like_comment));
+
+
+document.querySelectorAll('#post_like_form').forEach(element => element.addEventListener('submit', function(event){
+    event.preventDefault();
+    var post_pk = event.target.getAttribute('data-postid');
+    console.log(post_pk);
+    const url = '{% url "site:post_like" %}'
+    console.log(url);
+    var options = {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken},
+        mode: 'same-origin'
+    }
+    var formData = new FormData();
+    formData.append('id', post_pk)
+    options['body'] = formData;
+
+    // send HTTP request
+    fetch(url, options)
+    .then(response => response.json())
+    .then(data => {
+        if (data['status'] == 'ok'){
+            var post_div = document.querySelector('div[class="post"][data-postid="'+CSS.escape(post_pk)+'"]');
+            var likes_count_span = post_div.querySelector('span[class="likes_count"]');
+            var like_button = post_div.querySelector('input[class="like_button"]');
+
+            if (data['action'] == 'liked'){
+                var likes_count = parseInt(likes_count_span.innerHTML);
+                likes_count_span.innerHTML = likes_count + 1;
+                like_button.setAttribute("value", "Unlike")
+            } else{
+                var likes_count = parseInt(likes_count_span.innerHTML);
+                likes_count_span.innerHTML = likes_count - 1;
+                like_button.setAttribute("value", "Like")
+            }
+        }
+    }
+    )
+}));
 
 
 document.querySelector('#comment_form').addEventListener('submit', function(event){
@@ -113,11 +224,18 @@ document.querySelector('#comment_form').addEventListener('submit', function(even
     fetch(url, options)
     .then(response => response.json())
     .then(data => {
-        // clear text input
-        comment_text.value = "";
         if (data['status'] === 'ok'){
+            // clear text input
+            comment_text.value = "";
             // add created comment to comments section
             comments_div.innerHTML = data['comment'] + comments_div.innerHTML;
+
+            var no_comments_div =  comments_div.querySelector('div[id="no_comments"]')
+            if (no_comments_div != null){
+                no_comments_div.innerHTML = '';
+            }
+
+            document.querySelector('#comment_like_form').addEventListener('submit', like_comment);
         }
     }
     )
