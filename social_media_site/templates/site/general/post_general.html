@@ -1,6 +1,8 @@
 {% load static %}
+{% load thumbnail %}
 
-<div class="post">
+
+<div class="post" data-postid="{{post.pk}}">
     {% with author=post.author %}
     <div class="post_pp_div">
         {% if author.profile.profile_photo %}
@@ -29,13 +31,20 @@
     {% endif %}
 
     <div class="post_likes">
-        {{post.likes.count}} like{{post.likes.count|pluralize}}
+        {% with likes=post.likes.count %}
+        <span class="likes_count"> {{likes}} </span>
+        <span class="likes_description"> likes </span>
+        {% endwith %}
     </div>
 
-    <div class="like_form">
-        <form action="{% url 'site:post_like' id=post.pk %}" method=post>
+    <div class="like_form_div">
+        <form id="like_form" method="POST" data-postid="{{post.pk}}">
             {% csrf_token %}
-            <p><input class="like_button" type="submit" value="Like"></p>
+            {% if request.user in post.likes.all %}
+                <p><input class="like_button" type="submit" value="Unlike"></p>
+            {% else %}
+                <p><input class="like_button" type="submit" value="Like"></p>
+            {% endif %}
         </form>
     </div>
 
