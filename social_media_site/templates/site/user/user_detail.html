@@ -31,34 +31,133 @@
             {% if friendship_status == 'friends' %}
                 <form action="{% url 'site:profile_friendship_delete' id=user_profile.pk %}" method="post">
                     {% csrf_token %}
-                    <p><input type="submit" value="Delete from friends"></p>
+                    <p><input type="submit" value="Delete from friends" id="freindship_action_submit"></p>
                 </form>
             {% elif friendship_status == 'you_sent'%}
                 <form action="{% url 'site:profile_friendship_withdraw' id=user_profile.pk %}" method="post">
                     {% csrf_token %}
-                    <p><input type="submit" value="Withdraw friendship invitation"></p>
+                    <p><input type="submit" value="Withdraw friendship invitation" id="freindship_action_submit"></p>
                 </form>
             {% elif friendship_status == 'sent_to_you' %}
                 <form action="{% url 'site:profile_friendship_accept' id=user_profile.pk %}" method="post">
                     {% csrf_token %}
-                    <p><input type="submit" value="Accept friendship invitation"></p>
+                    <p><input type="submit" value="Accept friendship invitation" id="freindship_action_submit"></p>
                 </form>
 
                 <form action="{% url 'site:profile_friendship_decline' id=user_profile.pk %}" method="post">
                     {% csrf_token %}
-                    <p><input type="submit" value="Decline friendship invitation"></p>
+                    <p><input type="submit" value="Decline friendship invitation" id="freindship_action_submit"></p>
                 </form>
             {% else %}
                 <form action="{% url 'site:profile_friendship_send' id=user_profile.pk %}" method="post">
                     {% csrf_token %}
-                    <p><input type="submit" value="Invite to friends"></p>
+                    <p><input type="submit" value="Invite to friends" id="freindship_action_submit"></p>
                 </form>
             {% endif %}
         </div>
         {% endif %}
-
     </div>
 </div>
 
+<h1> User's last posts </h1>
+
+<div id=posts>
+    {% for post in user_posts %}
+        <div class="post" data-postid="{{post.pk}}">
+            {% with author=post.author %}
+            <div class="post_pp_div">
+                {% if author.profile.profile_photo %}
+                    <img class="post_pp" src="{{ author.profile.profile_photo|thumbnail_url:'post_pp' }}">
+                {% else %}
+                    <img class="post_pp" src="{% static 'default_img/profile_def.png' %}">
+                {% endif %}
+            </div>
+
+            <div class="post_author_name">
+                {{author.first_name}} {{author.last_name}}
+            </div>
+
+            <div class="post_date">
+                {{ post.creation_date|date:"d-m-Y"}}
+            </div>
+
+            <div class="post_text">
+                {{post.text|linebreaks}}
+            </div>
+
+            {% if post.photo %}
+                <div class="post_photo_div">
+                    <img class="post_photo" src={{post.photo.url}}>
+                </div>
+            {% endif %}
+
+            <div class="post_likes">
+                {% with likes=post.likes.count %}
+                <span class="likes_count"> {{likes}} </span>
+                <span class="likes_description"> likes </span>
+                {% endwith %}
+            </div>
+
+            <div class="like_form_div">
+                <form id="like_form" method="POST" data-postid="{{post.pk}}">
+                    {% csrf_token %}
+                    {% if request.user in post.likes.all %}
+                        <p><input class="like_button" type="submit" value="Unlike"></p>
+                    {% else %}
+                        <p><input class="like_button" type="submit" value="Like"></p>
+                    {% endif %}
+                </form>
+            </div>
+
+            <div class="go_to_post_detail">
+                <a href="{% url 'site:post_detail' id=post.pk %}"> Post discussion </a>
+            </div>
+
+            {% endwith %}
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{%block domready%}
+
+document.querySelectorAll('#like_form').forEach(element => element.addEventListener('submit', function(event){
+    event.preventDefault();
+    var post_pk = event.target.getAttribute('data-postid');
+    console.log(post_pk);
+    const url = '{% url "site:post_like" %}'
+    console.log(url);
+    var options = {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken},
+        mode: 'same-origin'
+    }
+    var formData = new FormData();
+    formData.append('id', post_pk)
+    options['body'] = formData;
+
+    // send HTTP request
+    fetch(url, options)
+    .then(response => response.json())
+    .then(data => {
+        if (data['status'] == 'ok'){
+            var post_div = document.querySelector('div[class="post"][data-postid="'+CSS.escape(post_pk)+'"]');
+            var likes_count_span = post_div.querySelector('span[class="likes_count"]');
+            var like_button = post_div.querySelector('input[class="like_button"]');
+
+            if (data['action'] == 'liked'){
+                var likes_count = parseInt(likes_count_span.innerHTML);
+                likes_count_span.innerHTML = likes_count + 1;
+                like_button.setAttribute("value", "Unlike")
+            } else{
+                var likes_count = parseInt(likes_count_span.innerHTML);
+                likes_count_span.innerHTML = likes_count - 1;
+                like_button.setAttribute("value", "Like")
+            }
+        }
+    }
+    )
+}));
 
 {% endblock %}
