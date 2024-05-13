@@ -1,5 +1,5 @@
 # Jarbuk
-Jarbuk is a web application, that I made to learn Django framework. Is is a social media website that allows users to make new posts and comment them. Users can also invite each other to friends and like posts and comments. This project was made only for learning purposes with no intention of using it in production, that's why django secret key is visible in setting. If anyone would like to use this project, remember to change django secret key first.
+Jarbuk is a web application that I made to learn Django framework. It is a social media website that allows users to make new posts and comment them. Users can also invite each other to friends and like posts and comments. This project was made only for learning purposes with no intention of using it in production, that's why django secret key is visible in settings. If anyone would like to use this project, remember to change django secret key first.
 
 # Tech used
 Apart from Django framework I used javascript for doing AJAX requests and CSS for styling.
