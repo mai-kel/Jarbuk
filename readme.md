@@ -16,6 +16,8 @@ python manage.py runserver
 Now you can visit jarbuk website at this link: http://localhost:8000
 
 # Screenshots
+![](showcase_screens/register.png)
+![](showcase_screens/login.png)
 ![](showcase_screens/posts_feed.png)
 ![](showcase_screens/post_detail.png)
 ![](showcase_screens/users_search.png)
