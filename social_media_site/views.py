@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .models import Post, Profile, FriendInvitation, Comment
@@ -79,8 +79,8 @@ def search_for_users(request):
 def user_detail(request, id):
     user = get_object_or_404(User, pk=id)
     friendship_status = determine_friendship_status(request, id)
-    if user.profile in request.user.profile.friends.all():
-        user_posts = user.posts
+    if user.profile in request.user.profile.friends.all() or id==request.user.pk:
+        user_posts = user.posts.all()[:10]
     else:
         user_posts = None
 
@@ -114,14 +114,50 @@ def determine_friendship_status(request, user_id):
 
 @login_required
 @require_POST
-def post_like(request, id):
-    # post = get_object_or_404(Post, pk=id)
-    # if PostLike.objects.filter(from_who=request.user, post=post).exists():
-    #     PostLike.objects.filter(from_who=request.user, post=post).delete()
-    # else:
-    #     like = PostLike(from_who=request.user, post=post)
-    #     like.save()
-    return JsonResponse({'status': 'ok'})
+def post_like(request):
+    id = request.POST.get('id')
+    try:
+        post = Post.objects.get(pk=id)
+    except:
+        return JsonResponse({'status': 'error'})
+
+    if post.author.profile not in request.user.profile.friends.all() and post.author != request.user:
+        return JsonResponse({'status': 'error'})
+
+    response_data = {}
+    if request.user in post.likes.all():
+        post.likes.remove(request.user)
+        response_data['action'] = 'unliked'
+    else:
+        post.likes.add(request.user)
+        response_data['action'] = 'liked'
+    response_data['status'] = 'ok'
+
+    return JsonResponse(response_data)
+
+
+@login_required
+@require_POST
+def comment_like(request):
+    id = request.POST.get('id')
+    try:
+        comment = Comment.objects.get(pk=id)
+    except:
+        return JsonResponse({'status': 'error'})
+
+    if comment.post.author.profile not in request.user.profile.friends.all() and comment.post.author != request.user:
+        return JsonResponse({'status': 'error'})
+
+    response_data = {}
+    if request.user in comment.likes.all():
+        comment.likes.remove(request.user)
+        response_data['action'] = 'unliked'
+    else:
+        comment.likes.add(request.user)
+        response_data['action'] = 'liked'
+    response_data['status'] = 'ok'
+
+    return JsonResponse(response_data)
 
 
 @login_required
@@ -140,9 +176,8 @@ def post_detail(request, id):
 @require_POST
 def create_comment(request, id):
     post = get_object_or_404(Post, pk=id)
-    if  request.user.profile not in post.author.profile.friends.all():
-        # TODO message
-        return
+    if  request.user.profile not in post.author.profile.friends.all() and request.user != post.author:
+        return JsonResponse({'status': 'error'})
 
     comment_text = request.POST.get('text')
     new_comment = Comment(text=comment_text, post=post, author=request.user)
@@ -156,6 +191,9 @@ def create_comment(request, id):
 
 
 def register(request):
+    if request.user.is_authenticated:
+        return redirect('site:posts_feed')
+
     if request.method == 'POST':
         registration_form = RegistrationForm(request.POST, request.FILES)
         if registration_form.is_valid():
@@ -318,30 +356,6 @@ def friends_list(request):
     friends = User.objects.filter(profile__in=request.user.profile.friends.all())
     return render(request, 'site/friends/friends_list.html',
                   {'friends': friends})
-
-
-def friendship_action(request, user_id, accept=False):
-    if request.user.pk == user_id:
-        return
-    user_recipient = get_object_or_404(User, pk=user_id)
-    logged_user_friends = User.objects.filter(profile__in=request.user.profile.friends.all())
-    logged_user_sent_invitations = request.user.invitations_sent.all()
-    recipient_user_sent_invitations = user_recipient.invitations_sent.all()
-
-    # users are friends already- delete from friends list
-    if user_recipient in logged_user_friends:
-        request.user.profile.friends.remove(user_recipient.profile)
-    # logged user sent invitation to recipient user- withdraw invitation
-    elif logged_user_sent_invitations.filter(to_who=user_recipient).exists():
-        logged_user_sent_invitations.filter(to_who=user_recipient).delete()
-    # recipient user sent invitation to logged user
-    elif recipient_user_sent_invitations.filter(to_who=request.user).exists():
-        recipient_user_sent_invitations.filter(to_who=request.user).delete()
-        if accept:
-            request.user.friends.add(user_recipient.profile)
-    # there is no invitations nor friendship between users- send invitation
-    else:
-        FriendInvitation.objects.create(from_who=request.user, to_who=user_recipient)
 
 
 @login_required
