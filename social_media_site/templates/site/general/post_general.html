@@ -26,7 +26,7 @@
 
     {% if post.photo %}
         <div class="post_photo_div">
-            <img class="post_photo" src={{post.photo.url}}>
+            <img class="post_photo" src="{{ post.photo|thumbnail_url:'post_photo' }}">
         </div>
     {% endif %}
 

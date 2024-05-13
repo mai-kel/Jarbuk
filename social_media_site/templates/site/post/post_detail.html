@@ -30,7 +30,7 @@
 
         {% if post.photo %}
             <div class="post_photo_div">
-                <img class="post_photo" src={{post.photo.url}}>
+                <img class="post_photo" src="{{ post.photo|thumbnail_url:'post_photo' }}">
             </div>
         {% endif %}
 
@@ -42,7 +42,7 @@
         </div>
 
         <div class="like_form_div">
-            <form id="post_like_form" method="POST" data-postid="{{post.pk}}">
+            <form id="like_form" method="POST" data-postid="{{post.pk}}">
                 {% csrf_token %}
                 {% if request.user in post.likes.all %}
                     <p><input class="like_button" type="submit" value="Unlike"></p>
