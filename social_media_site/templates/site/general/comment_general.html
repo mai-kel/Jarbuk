@@ -1,10 +1,11 @@
 {% load static %}
+{% load thumbnail %}
 
-<div class="comment_container">
+<div class="comment_container" data-commentid="{{comment.pk}}">
     {% with author=comment.author %}
     <div class="comment_pp_div">
         {% if author.profile.profile_photo %}
-            <img class="comment_pp" src="{{author.profile.profile_photo.url}}">
+            <img class="comment_pp" src="{{author.profile.profile_photo|thumbnail_url:'post_pp'}}">
         {% else %}
             <img class="comment_pp" src="{% static 'default_img/profile_def.png' %}">
         {% endif %}
@@ -21,5 +22,24 @@
     <div class="comment_text">
         {{comment.text|linebreaks}}
     </div>
+
+    <div class="comment_likes">
+        {% with likes=comment.likes.count %}
+        <span class="likes_count"> {{likes}} </span>
+        <span class="likes_description"> likes </span>
+        {% endwith %}
+    </div>
+
+    <div class="like_form_div">
+        <form id="comment_like_form" method="POST" data-commentid="{{comment.pk}}">
+            {% csrf_token %}
+            {% if request.user in comment.likes.all %}
+                <p><input class="like_button" type="submit" value="Unlike"></p>
+            {% else %}
+                <p><input class="like_button" type="submit" value="Like"></p>
+            {% endif %}
+        </form>
+    </div>
+
     {% endwith %}
 </div>
