@@ -14,7 +14,7 @@
 
     <div id=posts>
         {% for post in posts %}
-            <div class="post">
+            <div class="post" data-postid="{{post.pk}}">
                 {% with author=post.author %}
                 <div class="post_pp_div">
                     {% if author.profile.profile_photo %}
@@ -38,18 +38,25 @@
 
                 {% if post.photo %}
                     <div class="post_photo_div">
-                        <img class="post_photo" src={{post.photo.url}}>
+                        <img class="post_photo" src="{{ post.photo|thumbnail_url:'post_photo' }}">
                     </div>
                 {% endif %}
 
                 <div class="post_likes">
-                    {{post.likes.count}} like{{post.likes.count|pluralize}}
+                    {% with likes=post.likes.count %}
+                    <span class="likes_count"> {{likes}} </span>
+                    <span class="likes_description"> likes </span>
+                    {% endwith %}
                 </div>
 
-                <div class="like_form">
-                    <form action="{% url 'site:post_like' id=post.pk %}" method=post>
+                <div class="like_form_div">
+                    <form id="like_form" method="POST" data-postid="{{post.pk}}">
                         {% csrf_token %}
-                        <p><input class="like_button" type="submit" value="Like"></p>
+                        {% if request.user in post.likes.all %}
+                            <p><input class="like_button" type="submit" value="Unlike"></p>
+                        {% else %}
+                            <p><input class="like_button" type="submit" value="Like"></p>
+                        {% endif %}
                     </form>
                 </div>
 
@@ -65,6 +72,46 @@
 {% endblock %}
 
 {%block domready%}
+
+function post_liked(event){
+    event.preventDefault();
+    var post_pk = event.target.getAttribute('data-postid');
+    console.log(post_pk);
+    const url = '{% url "site:post_like" %}'
+    console.log(url);
+    var options = {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken},
+        mode: 'same-origin'
+    }
+    var formData = new FormData();
+    formData.append('id', post_pk)
+    options['body'] = formData;
+
+    // send HTTP request
+    fetch(url, options)
+    .then(response => response.json())
+    .then(data => {
+        if (data['status'] == 'ok'){
+            var post_div = document.querySelector('div[class="post"][data-postid="'+CSS.escape(post_pk)+'"]');
+            var likes_count_span = post_div.querySelector('span[class="likes_count"]');
+            var like_button = post_div.querySelector('input[class="like_button"]');
+
+            if (data['action'] == 'liked'){
+                var likes_count = parseInt(likes_count_span.innerHTML);
+                likes_count_span.innerHTML = likes_count + 1;
+                like_button.setAttribute("value", "Unlike")
+            } else{
+                var likes_count = parseInt(likes_count_span.innerHTML);
+                likes_count_span.innerHTML = likes_count - 1;
+                like_button.setAttribute("value", "Like")
+            }
+        }
+    }
+    )
+}
+
+document.querySelectorAll('#like_form').forEach(element => element.addEventListener('submit', post_liked));
 
 document.querySelector('#post_form').addEventListener('submit', function(event){
     event.preventDefault();
@@ -106,14 +153,16 @@ document.querySelector('#post_form').addEventListener('submit', function(event){
             // clear text input
             post_text.value = "";
 
+            var new_post = data['post'];
+
             // add created post to post feed
-            posts_div.innerHTML = data['post'] + posts_div.innerHTML;
+            posts_div.innerHTML = new_post + posts_div.innerHTML;
+            document.querySelector('#like_form').addEventListener('submit', post_liked);
         }
     }
     )
 
 });
-
 
 
 {% endblock %}
