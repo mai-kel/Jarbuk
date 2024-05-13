@@ -132,9 +132,10 @@ LOGOUT_URL = "site:logout"
 
 THUMBNAIL_ALIASES = {
     '': {
-        'post_pp': {'size': (50, 0), 'crop': True},
-        'profile_pp': {'size': (0, 200), 'crop': True},
-        'profile_cp': {'size': (1400, 500), 'crop': True},
-
+        'post_pp': {'size': (100, 0), 'crop': False},
+        'profile_pp': {'size': (0, 300), 'crop': False},
+        'profile_cp': {'size': (1400, 0), 'crop': False},
+        'post_photo': {'size': (0, 600), 'crop': False},
+        'friend_pp': {'size': (0, 300), 'crop': False}
     },
 }
