@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+{% load thumbnail %}
 {% block title %}Search for users{% endblock %}
 {% block content %}
 
@@ -10,17 +12,28 @@
         </form>
     </div>
 
-    <div class="users_found">
-        <ul class="users_list">
+    <div class="users_found_wrapper">
         {% for user in users_found %}
-            <li class=user_item>
-                <a href="{% url 'site:user_detail' id=user.pk %}"> {{user.first_name}} {{user.last_name}} </a>
-            </li>
+            <div class='user_found'>
+                <div class="user_found_photo_wrapper">
+                    {% if user.profile.profile_photo %}
+                        <img class="user_found_photo" src="{{user.profile.profile_photo|thumbnail_url:'friend_pp'}}">
+                    {% else %}
+                        <img class="user_found_photo" src="{% static 'default_img/profile_def.png' %}">
+                    {% endif %}
+                </div>
+
+                <div class="user_found_name">
+                    <a href="{% url 'site:user_detail' id=user.pk %}"> {{user.first_name}} {{user.last_name}} </a>
+                </div>
+            </div>
+
         {% empty %}
             {% if form_sent_correctly %}
-                <p>No users found</p>
+                <h1>No users found</h1>
             {% endif %}
         {% endfor %}
+
     </div>
 
 
