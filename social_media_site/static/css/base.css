@@ -27,6 +27,11 @@ body {
     padding: 0;
 }
 
+#top_menu{
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
 .menu li {
     margin-right: 20px;
 }
@@ -47,6 +52,11 @@ body {
     padding: 5px 10px;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 16px;
+}
+
+.logout button:hover {
+    background-color: #777c81
 }
 
 #content {
@@ -57,33 +67,75 @@ h1 {
     text-align: center;
 }
 
+/* LOGIN */
+
 .login_form {
-    max-width: 400px;
+    width: 400px;
     margin: 0 auto;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
     background-color: #f9f9f9;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
+  }
 
-form {
-    display: flex;
-    flex-direction: column;
-}
+  .login_form p {
+    margin-bottom: 15px;
+  }
 
-form p {
-    margin: 10px 0;
-}
+  .login_form label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .login_form input[type="text"],
+  .login_form input[type="password"] {
+    width: calc(100% - 20px);
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+  }
+
+  .login_form input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .login_form input[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+
+  #register_link_span {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  #register_link {
+    color: #007bff;
+    text-decoration: none;
+  }
+
+  #register_link:hover {
+    text-decoration: underline;
+  }
+
+
+
 
 
 /* PROFILE */
 .profile_container {
-    max-width: 80%;
+    width: 1400px;
     margin: 20px auto;
     display: flex;
     flex-direction: column;
     align-items: center;
+    border: 1px solid #ddd;
 }
 
 .cover_photo_div {
@@ -91,10 +143,9 @@ form p {
     width: 100%;
 }
 
-.cover_photo,
-.profile_photo {
-    width: 100%;
-    max-height: 500px;
+.cover_photo {
+    width: 1400px;
+    height: 500px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
@@ -125,75 +176,495 @@ form p {
     width: 100%;
     display: flex;
     margin-top: 20px;
+}
 
+.friendship_status{
+    display: flex;
+    margin: auto;
+    height: 100%;
+    margin-right: 50px;
+}
+
+#freindship_action_submit{
+    background-color: #555; /* Adjust as needed */
+    color: #fff;
+    border: none;
+    padding: 10px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+#freindship_action_submit:hover{
+    background-color: #777c81;
 }
 
 
-/* POST */
+/* POSTS FEED*/
+#posts {
+    margin: 20px auto;
+    width:  1400px;
+    align-items: center;
+}
+
+#post_form_div {
+    margin: 20px auto;
+    width: 1200px;
+    align-items: center;
+}
+
+#submit_post {
+    background-color: #555;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 22px;
+    cursor: pointer;
+    width: 80%;
+    margin: auto;
+    display: flex;
+}
+
+#submit_post:hover {
+    background-color: #777c81;
+}
+
+#post_text {
+    width: 100%;
+    resize: none;
+}
+
+/* Individual post styling */
 .post {
     border: 1px solid #ddd;
+    border-radius: 5px;
     margin-bottom: 20px;
     padding: 10px;
-    border-radius: 8px;
+    background-color: #fff;
 }
 
-.post_pp_div {
-    display: inline-block;
+/* Style for the like count */
+.post_likes {
+    font-size: 16px;
+    color: #5a81b4;
+    margin-bottom: 5px;
+    display: inline-block; /* Ensures the like count stays on the same line */
+}
+
+/* Profile picture */
+.post_pp {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
     margin-right: 10px;
 }
 
-.post_pp {
-    max-width: 50px;
-    border-radius: 50%;
-}
-
+/* Author name */
 .post_author_name {
     font-weight: bold;
     margin-bottom: 5px;
 }
 
+/* Post date */
 .post_date {
     color: #888;
     font-size: 12px;
+    margin-bottom: 5px;
 }
 
+/* Post text */
 .post_text {
-    margin: 10px 0;
+    margin-bottom: 10px;
 }
 
-.post_photo_div {
-    margin-top: 10px;
-}
-
+/* Post photo */
 .post_photo {
     max-width: 100%;
-    border-radius: 8px;
-}
-
-.like_form,
-.go_to_post_detail {
+    border-radius: 5px;
     margin-top: 10px;
 }
 
+/* Like button */
 .like_button {
-    background-color: #4CAF50;
-    color: white;
+    background-color: #4267B2;
+    color: #fff;
     border: none;
-    padding: 8px 12px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 14px;
+    padding: 5px 10px;
+    border-radius: 3px;
     cursor: pointer;
-    border-radius: 4px;
 }
 
+.like_button:hover {
+    background-color: #2a4b8d;
+}
+
+/* Post discussion link */
 .go_to_post_detail a {
-    color: #428bca;
+    color: #385898;
     text-decoration: none;
-    font-size: 14px;
 }
 
 .go_to_post_detail a:hover {
     text-decoration: underline;
 }
+
+
+/* POST DETAIL */
+/* Styles for the comment container */
+.post_with_comments {
+    width: 1400px;
+    margin: auto;
+    border: 3px solid #ddd;
+}
+
+.comment_container {
+    display: flex;
+    flex-direction: column; /* Arrange items vertically */
+    border: 1px solid #ddd; /* Border around the comment */
+    padding: 10px; /* Padding inside the comment */
+    width: 80%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto
+}
+
+/* Styles for the profile picture container */
+.comment_pp_div {
+    margin-bottom: 10px; /* Spacing between profile picture and name */
+}
+
+/* Styles for the profile picture */
+.comment_pp {
+    width: 50px; /* Adjust the size as needed */
+    height: 50px; /* Adjust the size as needed */
+    border-radius: 50%; /* Ensures the profile picture is round */
+}
+
+/* Styles for the author's name */
+.comment_author_name {
+    font-weight: bold;
+}
+
+/* Styles for the comment date */
+.comment_date {
+    color: #777; /* Adjust the color as needed */
+    font-size: 0.8em; /* Adjust the font size as needed */
+    margin-bottom: 5px;
+}
+
+/* Styles for the comment text */
+#comment_text {
+    text-align: left; /* Align text to the left */
+    width: 50%;
+    resize: none;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#submit_comment {
+    width: 20%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #555;
+    border-radius: 10px;
+    color: #fff;
+    padding: 5px;
+}
+
+#submit_comment:hover {
+    background-color: #777c81;
+}
+
+.comment_form_container{
+    width: 80%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+#no_comments{
+    text-align: center;
+    margin: 20px;
+}
+
+
+
+/* REGISTRATION */
+.registration_form {
+    width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+
+  .registration_form label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .registration_form input[type="text"],
+  .registration_form input[type="email"],
+  .registration_form input[type="password"],
+  .registration_form input[type="date"],
+  .registration_form input[type="file"] {
+    width: calc(100% - 20px);
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+  }
+
+  .registration_form input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .registration_form input[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+
+
+
+  /* INVITATIONS SENT */
+  .recipient_container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .recipient_profile_photo_wrapper {
+    margin-right: 10px;
+  }
+
+  .user_profile_photo {
+    width: 100px; /* Adjust as needed */
+    height: 100px; /* Adjust as needed */
+    border-radius: 50%;
+  }
+
+  .recipient_name {
+    margin-right: 10px;
+  }
+
+  .recipient_name a {
+    color: #333;
+    text-decoration: none;
+  }
+
+  .recipient_name a:hover {
+    text-decoration: underline;
+  }
+
+  .withdraw_invitation_container p {
+    margin: 0;
+  }
+
+  .withdraw_invitation_container input[type="submit"] {
+    background-color: #555;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .withdraw_invitation_container input[type="submit"]:hover {
+    background-color: #777c81
+  }
+
+
+/* FRIENDS LIST */
+.friend_container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .friend_profile_photo_wrapper {
+    margin-right: 10px;
+  }
+
+  .friend_profile_photo {
+    width: 100px; /* Adjust as needed */
+    height: 100px; /* Adjust as needed */
+    border-radius: 50%;
+  }
+
+  .friend_name {
+    margin-right: 10px;
+  }
+
+  .friend_name a {
+    color: #333;
+    text-decoration: none;
+  }
+
+  .friend_name a:hover {
+    text-decoration: underline;
+  }
+
+  .delete_friend p {
+    margin: 0;
+  }
+
+  .delete_friend input[type="submit"] {
+    background-color: #555;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .delete_friend input[type="submit"]:hover {
+    background-color: #777c81; /* Adjust as needed */
+  }
+
+
+
+  /* INVITATIONS RECEIVED */
+  .sender_container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .sender_profile_photo_wrapper {
+    margin-right: 10px;
+  }
+
+  .user_profile_photo {
+    width: 100px; /* Adjust as needed */
+    height: 100px; /* Adjust as needed */
+    border-radius: 50%;
+  }
+
+  .sender_name {
+    margin-right: 10px;
+  }
+
+  .sender_name a {
+    color: #333;
+    text-decoration: none;
+  }
+
+  .sender_name a:hover {
+    text-decoration: underline;
+  }
+
+  .accept_invitation_container p,
+  .decline_invitation_container p {
+    margin: 0;
+  }
+
+  .accept_invitation_container input[type="submit"],
+  .decline_invitation_container input[type="submit"] {
+    background-color: #555; /* Adjust as needed */
+    color: #fff;
+    border: none;
+    padding: 10px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 5px;
+  }
+
+  .accept_invitation_container input[type="submit"]:hover,
+  .decline_invitation_container input[type="submit"]:hover {
+    background-color: #777c81; /* Adjust as needed */
+  }
+
+
+
+  /* USERS LIST */
+  .search_form {
+    width: 60%;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .search_form p {
+    margin-bottom: 15px;
+  }
+
+  .search_form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #495057;
+    font-weight: bold;
+  }
+
+  .search_form input[type="text"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+  }
+
+  .search_form input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #555;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 18px;
+  }
+
+  .search_form input[type="submit"]:hover {
+    background-color: #777c81;
+  }
+
+  .users_found_wrapper {
+    width: 60%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px; /* Adjust as needed */
+    margin-top: 20px;
+    margin: auto;
+  }
+
+  .user_found {
+    width: 200px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .user_found_photo_wrapper {
+    margin-bottom: 10px;
+  }
+
+  .user_found_photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+  }
+
+  .user_found_name a {
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .user_found_name a:hover {
+    text-decoration: underline;
+  }
+
+
