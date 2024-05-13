@@ -309,6 +309,33 @@ h1 {
     text-decoration: underline;
 }
 
+.pagination {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.step-links {
+  display: inline-block;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.step-links a {
+  color: #007bff;
+  text-decoration: none;
+  margin: 0 5px;
+}
+
+.step-links a:hover {
+  text-decoration: underline;
+}
+
+.current {
+  font-weight: bold;
+}
+
+
 
 /* POST DETAIL */
 /* Styles for the comment container */
