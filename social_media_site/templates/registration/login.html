@@ -2,18 +2,22 @@
 {% block title %}Log In{% endblock %}
 {% block content %}
     <h1>Log In</h1>
-    {% if form.errors %}
+    {% comment %} {% if form.errors %}
         <p>
             Password or login incoreect. Please try again.
         </p>
-    {% endif %}
+    {% endif %} {% endcomment %}
 
     <div class="login_form">
-        <form action="{% url "site:login" %}" method="post">
+        <form action="{% url 'site:login' %}" method="post">
             {{ form.as_p }}
             {% csrf_token %}
             <input type="hidden" name="next" value="{{next}}"/>
             <p><input type="submit" value="Log In"></p>
         </form>
+
+        <span id="register_link_span"> If you don't have account yet, you can register <span>
+        <a href="{% url 'site:register'%}" id="register_link">here.</a>
     </div>
+
 {% endblock %}
