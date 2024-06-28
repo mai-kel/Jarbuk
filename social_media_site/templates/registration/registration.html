@@ -2,11 +2,6 @@
 {% block title %}Registration{% endblock %}
 {% block content %}
     <h1>Register</h1>
-    {% if form.errors %}
-        <p>
-            Form filled incorrectly.
-        </p>
-    {% endif %}
 
     <div class="registration_form">
         <form action="{% url 'site:register' %}" method="post" enctype="multipart/form-data">
