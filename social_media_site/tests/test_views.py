@@ -7,6 +7,14 @@ import social_media_site.models as my_models
 from django.contrib.auth.models import User
 from datetime import datetime, date
 
+def register_client(client, request_data: dict):
+    url = reverse('site:register')
+    return client.post(url, request_data)
+
+def login_client(client, request_data: dict):
+    url = reverse('site:login')
+    return client.post(url, request_data)
+
 class TestRegistrationView(TestCase):
 
     def setUp(self):
@@ -96,7 +104,6 @@ class TestLogin(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        url = reverse('site:register')
         request_data = {
                 'username': 'testuser123',
                 'first_name': 'TestName',
@@ -106,7 +113,7 @@ class TestLogin(TestCase):
                 'password2': 'testpassword',
                 'birthdate': '2021-01-01',
                 }
-        Client().post(url, request_data)
+        register_client(Client(), request_data)
 
     def setUp(self):
         self.client = Client()
@@ -129,5 +136,31 @@ class TestLogin(TestCase):
         self.assertTrue(get_user(self.client).is_authenticated)
         self.assertRedirects(response, reverse('site:posts_feed'))
 
+
+class TestCreatePost(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        request_data = {
+        'username': 'testuser123',
+        'first_name': 'TestName',
+        'last_name': 'TestSurname',
+        'email': 'qwertyuiop@gmail.com',
+        'password': 'testpassword',
+        'password2': 'testpassword',
+        'birthdate': '2021-01-01',
+        }
+        register_client(self.client, request_data)
+        login_client(self.client, {'username': 'testuser123', 'password': 'testpassword'})
+
+    def test_create_post(self):
+        url = reverse('site:post_create')
+        request_data = {
+            'text': 'Test post text',
+        }
+        response = self.client.post(url, request_data)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'ok')
+        self.assertTrue(my_models.Post.objects.filter(text='Test post text').exists())
 
 
