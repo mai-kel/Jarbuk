@@ -5,7 +5,7 @@ from .models import Post, Profile, FriendInvitation, Comment
 from django.db.models import Q
 from .forms import UserForm, RegistrationForm, PostCreateForm, CommentCreateForm
 from django.views.decorators.http import require_GET, require_POST
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.core.paginator import Paginator
 
@@ -267,7 +267,7 @@ def profile_send_invitation(request, id):
     else:
         FriendInvitation.objects.create(from_who=request.user, to_who=user_recipient)
 
-    return user_detail(request, id)
+    return redirect('site:user_detail', id=id)
 
 
 @require_POST
@@ -284,7 +284,7 @@ def profile_withdraw_invitation(request, id):
         # TODO implement appropriate message
         pass
 
-    return user_detail(request, id)
+    return redirect('site:user_detail', id=id)
 
 
 @require_POST
@@ -302,7 +302,7 @@ def profile_accept_invitation(request, id):
         # TODO implement appropriate message
         pass
 
-    return user_detail(request, id)
+    return redirect('site:user_detail', id=id)
 
 
 @require_POST
@@ -319,7 +319,7 @@ def profile_decline_invitation(request, id):
         # TODO implement appropriate message
         pass
 
-    return user_detail(request, id)
+    return redirect('site:user_detail', id=id)
 
 
 @require_POST
@@ -336,7 +336,7 @@ def profile_delete_friend(request, id):
         # TODO implement appropriate message
         pass
 
-    return user_detail(request, id)
+    return redirect('site:user_detail', id=id)
 
 
 @require_POST
@@ -352,7 +352,7 @@ def delete_friend_friendslist(request, id):
     else:
         # TODO implement appropriate message
         pass
-    return friends_list(request)
+    return redirect('site:friends_list')
 
 
 @login_required
@@ -383,7 +383,7 @@ def invitations_sent_withdraw(request, id):
         # TODO implement appropriate message
         pass
 
-    return invitations_sent_list(request)
+    return redirect('site:invitations_sent')
 
 
 @login_required
@@ -408,7 +408,7 @@ def invitations_received_accept(request, id):
         # TODO implement appropriate message
         pass
 
-    return invitations_received_list(request)
+    return redirect('site:invitations_received')
 
 
 @require_POST
@@ -425,4 +425,4 @@ def invitations_received_decline(request, id):
         # TODO implement appropriate message
         pass
 
-    return invitations_received_list(request)
+    return redirect('site:invitations_received')
