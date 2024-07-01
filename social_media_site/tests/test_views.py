@@ -6,10 +6,18 @@ from django.contrib.auth import views as auth_views, get_user
 import social_media_site.models as my_models
 from django.contrib.auth.models import User
 from datetime import datetime, date
+from social_media_site.models import Profile
 
-def register_client(client, request_data: dict):
-    url = reverse('site:register')
-    return client.post(url, request_data)
+def register_user(request_data: dict):
+    user = User.objects.create_user(username=request_data['username'],
+                             email=request_data['email'],
+                             password=request_data['password'],
+                             first_name=request_data['first_name'],
+                             last_name=request_data['last_name'])
+
+    Profile.objects.create(user=user,
+                           date_of_birth=datetime.strptime(request_data['birthdate'], '%Y-%m-%d').date())
+
 
 def login_client(client, request_data: dict):
     url = reverse('site:login')
@@ -71,6 +79,7 @@ class TestRegistrationView(TestCase):
                 }
         response = self.client.post(url, request_data2)
         self.assertTemplateUsed(response, 'registration/registration.html')
+        self.assertInHTML('Username already used', response.content.decode())
         self.assertFalse(User.objects.filter(email='qwertyuiop@gmail.com').exists())
 
     def test_existing_email(self):
@@ -97,6 +106,7 @@ class TestRegistrationView(TestCase):
                 }
         response = self.client.post(url, request_data2)
         self.assertTemplateUsed(response, 'registration/registration.html')
+        self.assertInHTML('Email already used', response.content.decode())
         self.assertFalse(User.objects.filter(username='testuser123').exists())
 
 
@@ -113,7 +123,7 @@ class TestLogin(TestCase):
                 'password2': 'testpassword',
                 'birthdate': '2021-01-01',
                 }
-        register_client(Client(), request_data)
+        register_user(request_data)
 
     def setUp(self):
         self.client = Client()
@@ -150,7 +160,7 @@ class TestCreatePost(TestCase):
         'password2': 'testpassword',
         'birthdate': '2021-01-01',
         }
-        register_client(self.client, request_data)
+        register_user(request_data)
         login_client(self.client, {'username': 'testuser123', 'password': 'testpassword'})
 
     def test_create_post(self):
@@ -198,9 +208,9 @@ class TestSearchForUsers(TestCase):
             'birthdate': '2021-01-01',
         }
         client = Client()
-        register_client(client, user1_data)
-        register_client(client, user2_data)
-        register_client(client, user3_data)
+        register_user(user1_data)
+        register_user(user2_data)
+        register_user(user3_data)
 
     def setUp(self):
         self.client = Client()
