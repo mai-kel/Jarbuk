@@ -224,25 +224,25 @@ class TestSearchForUsers(TestCase):
     def test_search_by_first_name(self):
         url = reverse('site:users_search')
         response = self.client.post(url, {'first_name': 'Juan'})
-        self.assertTrue('Juan Rodriguez' in response.content.decode())
-        self.assertTrue('Juan Sanchez' in response.content.decode())
+        self.assertInHTML('Juan Rodriguez', response.content.decode())
+        self.assertInHTML('Juan Sanchez', response.content.decode())
 
     def test_search_by_last_name(self):
         url = reverse('site:users_search')
         response = self.client.post(url, {'last_name': 'Rodriguez'})
-        self.assertTrue('Juan Rodriguez' in response.content.decode())
-        self.assertTrue('Pablo Rodriguez' in response.content.decode())
+        self.assertInHTML('Juan Rodriguez', response.content.decode())
+        self.assertInHTML('Pablo Rodriguez', response.content.decode())
 
     def test_search_by_both_names(self):
         url = reverse('site:users_search')
         response = self.client.post(url, {'first_name': 'Juan', 'last_name': 'Rodriguez'})
-        self.assertTrue('Juan Rodriguez' in response.content.decode())
-        self.assertFalse('Juan Sanchez' in response.content.decode())
-        self.assertFalse('Pablo Rodriguez' in response.content.decode())
+        self.assertInHTML('Juan Rodriguez', response.content.decode())
+        self.assertNotContains(response, 'Juan Sanchez')
+        self.assertNotContains(response, 'Pablo Rodriguez')
 
     def test_search_no_users_found(self):
         url = reverse('site:users_search')
         response = self.client.post(url, {'first_name': 'Pablo', 'last_name': 'Sanchez'})
-        self.assertTrue('No users found' in response.content.decode())
+        self.assertInHTML('No users found', response.content.decode())
 
 
