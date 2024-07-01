@@ -164,3 +164,75 @@ class TestCreatePost(TestCase):
         self.assertTrue(my_models.Post.objects.filter(text='Test post text').exists())
 
 
+class TestSearchForUsers(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        user1_data = {
+            'username': 'test_username1',
+            'first_name': 'Juan',
+            'last_name': 'Rodriguez',
+            'email': 'test_email1@gmail.com',
+            'password': 'test_password1',
+            'password2': 'test_password1',
+            'birthdate': '2021-01-01',
+        }
+
+        user2_data = {
+            'username': 'test_username2',
+            'first_name': 'Juan',
+            'last_name': 'Sanchez',
+            'email': 'test_email2@gmail.com',
+            'password': 'test_password2',
+            'password2': 'test_password2',
+            'birthdate': '2021-01-01',
+        }
+
+        user3_data = {
+            'username': 'test_username3',
+            'first_name': 'Pablo',
+            'last_name': 'Rodriguez',
+            'email': 'test_email3@gmail.com',
+            'password': 'test_password3',
+            'password2': 'test_password3',
+            'birthdate': '2021-01-01',
+        }
+        client = Client()
+        register_client(client, user1_data)
+        register_client(client, user2_data)
+        register_client(client, user3_data)
+
+    def setUp(self):
+        self.client = Client()
+        login_client(self.client, {'username': 'test_username1', 'password': 'test_password1'})
+
+    def test_search_for_users_get(self):
+        url = reverse('site:users_search')
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, 'site/user/users_list.html')
+
+    def test_search_by_first_name(self):
+        url = reverse('site:users_search')
+        response = self.client.post(url, {'first_name': 'Juan'})
+        self.assertTrue('Juan Rodriguez' in response.content.decode())
+        self.assertTrue('Juan Sanchez' in response.content.decode())
+
+    def test_search_by_last_name(self):
+        url = reverse('site:users_search')
+        response = self.client.post(url, {'last_name': 'Rodriguez'})
+        self.assertTrue('Juan Rodriguez' in response.content.decode())
+        self.assertTrue('Pablo Rodriguez' in response.content.decode())
+
+    def test_search_by_both_names(self):
+        url = reverse('site:users_search')
+        response = self.client.post(url, {'first_name': 'Juan', 'last_name': 'Rodriguez'})
+        self.assertTrue('Juan Rodriguez' in response.content.decode())
+        self.assertFalse('Juan Sanchez' in response.content.decode())
+        self.assertFalse('Pablo Rodriguez' in response.content.decode())
+
+    def test_search_no_users_found(self):
+        url = reverse('site:users_search')
+        response = self.client.post(url, {'first_name': 'Pablo', 'last_name': 'Sanchez'})
+        self.assertTrue('No users found' in response.content.decode())
+
+
