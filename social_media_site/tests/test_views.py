@@ -6,7 +6,7 @@ from django.contrib.auth import views as auth_views, get_user
 import social_media_site.models as my_models
 from django.contrib.auth.models import User
 from datetime import datetime, date
-from social_media_site.models import Profile
+from social_media_site.models import Profile, Post
 
 def register_user(request_data: dict):
     user = User.objects.create_user(username=request_data['username'],
@@ -244,5 +244,68 @@ class TestSearchForUsers(TestCase):
         url = reverse('site:users_search')
         response = self.client.post(url, {'first_name': 'Pablo', 'last_name': 'Sanchez'})
         self.assertInHTML('No users found', response.content.decode())
+
+
+class TestPostsFeed(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        user1_data = {
+            'username': 'test_username1',
+            'first_name': 'Juan',
+            'last_name': 'Rodriguez',
+            'email': 'test_email1@gmail.com',
+            'password': 'test_password1',
+            'password2': 'test_password1',
+            'birthdate': '2021-01-01',
+        }
+
+        user2_data = {
+            'username': 'test_username2',
+            'first_name': 'Juan',
+            'last_name': 'Sanchez',
+            'email': 'test_email2@gmail.com',
+            'password': 'test_password2',
+            'password2': 'test_password2',
+            'birthdate': '2021-01-01',
+        }
+
+        user3_data = {
+            'username': 'test_username3',
+            'first_name': 'Pablo',
+            'last_name': 'Rodriguez',
+            'email': 'test_email3@gmail.com',
+            'password': 'test_password3',
+            'password2': 'test_password3',
+            'birthdate': '2021-01-01',
+        }
+        register_user(user1_data)
+        register_user(user2_data)
+        register_user(user3_data)
+
+        post1 = Post.objects.create(author=User.objects.get(username='test_username1'),
+                                    text='Test post 1 text')
+        post2 = Post.objects.create(author=User.objects.get(username='test_username2'),
+                                    text='Test post 2 text')
+        post3 = Post.objects.create(author=User.objects.get(username='test_username3'),
+                                    text='Test post 3 text')
+
+        User.objects.get(username='test_username1').profile.friends.add(User.objects.get(username='test_username2').profile)
+
+    def test_template_used(self):
+        client = Client()
+        login_client(client, {'username': 'test_username1', 'password': 'test_password1'})
+        url = reverse('site:posts_feed')
+        response = client.get(url)
+        self.assertTemplateUsed(response, 'site/posts_feed.html')
+
+    def test_posts_visibility(self):
+        client = Client()
+        login_client(client, {'username': 'test_username1', 'password': 'test_password1'})
+        url = reverse('site:posts_feed')
+        response = client.get(url)
+        self.assertInHTML('Test post 1 text', response.content.decode())
+        self.assertInHTML('Test post 2 text', response.content.decode())
+        self.assertNotContains(response, 'Test post 3 text')
 
 
