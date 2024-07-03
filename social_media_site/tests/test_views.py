@@ -6,7 +6,7 @@ from django.contrib.auth import views as auth_views, get_user
 import social_media_site.models as my_models
 from django.contrib.auth.models import User
 from datetime import datetime, date
-from social_media_site.models import Profile, Post
+from social_media_site.models import Profile, Post, FriendInvitation
 
 def register_user(request_data: dict):
     user = User.objects.create_user(username=request_data['username'],
@@ -14,9 +14,9 @@ def register_user(request_data: dict):
                              password=request_data['password'],
                              first_name=request_data['first_name'],
                              last_name=request_data['last_name'])
-
     Profile.objects.create(user=user,
                            date_of_birth=datetime.strptime(request_data['birthdate'], '%Y-%m-%d').date())
+    return user
 
 
 def login_client(client, request_data: dict):
@@ -307,5 +307,145 @@ class TestPostsFeed(TestCase):
         self.assertInHTML('Test post 1 text', response.content.decode())
         self.assertInHTML('Test post 2 text', response.content.decode())
         self.assertNotContains(response, 'Test post 3 text')
+
+
+class TestUserDetail(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        user1_data = {
+            'username': 'username1',
+            'first_name': 'first_name1',
+            'last_name': 'last_name1',
+            'email': 'email1@gmail.com',
+            'password': 'password1',
+            'password2': 'password1',
+            'birthdate': '2021-01-01',
+        }
+        user2_data = {
+            'username': 'username2',
+            'first_name': 'first_name2',
+            'last_name': 'last_name2',
+            'email': 'email2@gmail.com',
+            'password': 'password2',
+            'password2': 'password2',
+            'birthdate': '2021-01-01',
+        }
+        user3_data = {
+            'username': 'username3',
+            'first_name': 'first_name3',
+            'last_name': 'last_name3',
+            'email': 'email3@gmail.com',
+            'password': 'password3',
+            'password2': 'password3',
+            'birthdate': '2021-01-01',
+        }
+        user4_data = {
+            'username': 'username4',
+            'first_name': 'first_name4',
+            'last_name': 'last_name4',
+            'email': 'email4@gmail.com',
+            'password': 'password4',
+            'password2': 'password4',
+            'birthdate': '2021-01-01',
+        }
+        user5_data = {
+            'username': 'username5',
+            'first_name': 'first_name5',
+            'last_name': 'last_name5',
+            'email': 'email5@gmail.com',
+            'password': 'password5',
+            'password2': 'password5',
+            'birthdate': '2021-01-01',
+        }
+        user1 = register_user(user1_data)
+        user2 = register_user(user2_data)
+        user3 = register_user(user3_data)
+        user4 = register_user(user4_data)
+        user5 = register_user(user5_data)
+
+        user1.profile.friends.add(user2.profile)
+        FriendInvitation.objects.create(from_who=user1, to_who=user4)
+        FriendInvitation.objects.create(from_who=user3, to_who=user1)
+
+        for i in range(1, 6):
+            Post.objects.create(author=locals()[f'user{i}'], text=f'User{i} post text 1')
+
+        for i in range(2, 15):
+            Post.objects.create(author=user1, text=f'User1 post text {i}')
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_template_used(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:user_detail', args=[User.objects.get(username='username1').pk])
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, 'site/user/user_detail.html')
+
+    def test_user_sees_his_last_10_posts(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:user_detail', args=[User.objects.get(username='username1').pk])
+        response = self.client.get(url)
+        self.assertInHTML('User1 post text 1', response.content.decode())
+        self.assertInHTML('User1 post text 10', response.content.decode())
+        self.assertNotContains(response, 'User1 post text 12')
+        self.assertNotContains(response, 'User1 post text 11')
+
+    def test_user_sees_his_friends_posts(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:user_detail', args=[User.objects.get(username='username2').pk])
+        response = self.client.get(url)
+        self.assertContains(response, 'User2 post text 1')
+
+    def test_user_can_delete_friend(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:user_detail', args=[User.objects.get(username='username2').pk])
+        response = self.client.get(url)
+        self.assertContains(response, 'Delete from friends')
+        self.assertContains(response, reverse('site:profile_friendship_delete',
+                                              args=[User.objects.get(username='username2').pk]))
+
+    def test_user_cant_see_strangers_posts(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:user_detail', args=[User.objects.get(username='username5').pk])
+        response = self.client.get(url)
+        self.assertNotContains(response, 'User5 post text 1')
+
+    def test_user_cant_see_invited_user_posts(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:user_detail', args=[User.objects.get(username='username4').pk])
+        response = self.client.get(url)
+        self.assertNotContains(response, 'User4 post text 1')
+
+    def test_user_cant_see_inviting_user_posts(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:user_detail', args=[User.objects.get(username='username3').pk])
+        response = self.client.get(url)
+        self.assertNotContains(response, 'User3 post text 1')
+
+    def test_user_can_invite(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:user_detail', args=[User.objects.get(username='username5').pk])
+        response = self.client.get(url)
+        self.assertContains(response, 'Invite to friends')
+        self.assertContains(response, reverse('site:profile_friendship_send',
+                                              args=[User.objects.get(username='username5').pk]))
+
+    def test_user_can_accept_and_decline_invitation(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:user_detail', args=[User.objects.get(username='username3').pk])
+        response = self.client.get(url)
+        self.assertContains(response, 'Accept friendship invitation')
+        self.assertContains(response, reverse('site:profile_friendship_accept',
+                                              args=[User.objects.get(username='username3').pk]))
+        self.assertContains(response, 'Decline friendship invitation')
+        self.assertContains(response, reverse('site:profile_friendship_decline',
+                                              args=[User.objects.get(username='username3').pk]))
+
+
+
+
+
 
 
