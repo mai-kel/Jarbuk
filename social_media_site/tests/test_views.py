@@ -6,7 +6,7 @@ from django.contrib.auth import views as auth_views, get_user
 import social_media_site.models as my_models
 from django.contrib.auth.models import User
 from datetime import datetime, date
-from social_media_site.models import Profile, Post, FriendInvitation
+from social_media_site.models import Profile, Post, FriendInvitation, Comment
 
 def register_user(request_data: dict):
     user = User.objects.create_user(username=request_data['username'],
@@ -537,5 +537,125 @@ class TestPostLike(TestCase):
         self.assertTrue(response.json()['status'] == 'error')
         self.assertTrue(self.post3.likes.count() == 0)
 
+
+class TestCommentLike(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        user1_data = {
+            'username': 'username1',
+            'first_name': 'first_name1',
+            'last_name': 'last_name1',
+            'email': 'email1@gmail.com',
+            'password': 'password1',
+            'password2': 'password1',
+            'birthdate': '2021-01-01',
+        }
+        user2_data = {
+            'username': 'username2',
+            'first_name': 'first_name2',
+            'last_name': 'last_name2',
+            'email': 'email2@gmail.com',
+            'password': 'password2',
+            'password2': 'password2',
+            'birthdate': '2021-01-01',
+        }
+        user3_data = {
+            'username': 'username3',
+            'first_name': 'first_name3',
+            'last_name': 'last_name3',
+            'email': 'email3@gmail.com',
+            'password': 'password3',
+            'password2': 'password3',
+            'birthdate': '2021-01-01',
+        }
+        user1 = register_user(user1_data)
+        user2 = register_user(user2_data)
+        user3 = register_user(user3_data)
+
+        user1.profile.friends.add(user2.profile)
+        user2.profile.friends.add(user3.profile)
+
+        post1=Post.objects.create(author=user1, text='User1 post text')
+        post2=Post.objects.create(author=user2, text='User2 post text')
+        post3=Post.objects.create(author=user3, text='User3 post text')
+
+        Comment.objects.create(author=user1, post=post1, text='User1 comment post1')
+        Comment.objects.create(author=user1, post=post2, text='User1 comment post2')
+        Comment.objects.create(author=user2, post=post3, text='User2 comment post3')
+        Comment.objects.create(author=user3, post=post2, text='User3 comment post2')
+
+    def setUp(self):
+        self.client = Client()
+        self.comment1 = Comment.objects.get(text='User1 comment post1')
+        self.comment2 = Comment.objects.get(text='User1 comment post2')
+        self.comment3 = Comment.objects.get(text='User2 comment post3')
+        self.comment4 = Comment.objects.get(text='User3 comment post2')
+
+
+    def test_user_liking_his_comment_under_his_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:comment_like')
+        response = self.client.post(url, {'id': self.comment1.pk})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'ok')
+        self.assertTrue(response.json()['action'] == 'liked')
+        self.assertTrue(self.comment1.likes.count() == 1)
+
+    def test_user_unliking_his_comment_under_his_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        self.comment1.likes.add(User.objects.get(username='username1'))
+        url = reverse('site:comment_like')
+        response = self.client.post(url, {'id': self.comment1.pk})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'ok')
+        self.assertTrue(response.json()['action'] == 'unliked')
+        self.assertTrue(self.comment1.likes.count() == 0)
+
+    def test_user_liking_his_comment_under_friends_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:comment_like')
+        response = self.client.post(url, {'id': self.comment2.pk})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'ok')
+        self.assertTrue(response.json()['action'] == 'liked')
+        self.assertTrue(self.comment2.likes.count() == 1)
+
+    def test_user_unliking_his_comment_under_friends_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        self.comment2.likes.add(User.objects.get(username='username1'))
+        url = reverse('site:comment_like')
+        response = self.client.post(url, {'id': self.comment2.pk})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'ok')
+        self.assertTrue(response.json()['action'] == 'unliked')
+        self.assertTrue(self.comment2.likes.count() == 0)
+
+    def test_user_liking_strangers_comment_under_friends_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:comment_like')
+        response = self.client.post(url, {'id': self.comment4.pk})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'ok')
+        self.assertTrue(response.json()['action'] == 'liked')
+        self.assertTrue(self.comment4.likes.count() == 1)
+
+    def test_user_unliking_strangers_comment_under_friends_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        self.comment4.likes.add(User.objects.get(username='username1'))
+        url = reverse('site:comment_like')
+        response = self.client.post(url, {'id': self.comment4.pk})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'ok')
+        self.assertTrue(response.json()['action'] == 'unliked')
+        self.assertTrue(self.comment4.likes.count() == 0)
+
+    def test_user_liking_friends_comment_under_strangers_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:comment_like')
+        response = self.client.post(url, {'id': self.comment3.pk})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'error')
+        self.assertTrue(self.comment3.likes.count() == 0)
 
 
