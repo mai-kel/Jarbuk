@@ -444,8 +444,98 @@ class TestUserDetail(TestCase):
                                               args=[User.objects.get(username='username3').pk]))
 
 
+class TestPostLike(TestCase):
 
+    @classmethod
+    def setUpTestData(cls):
+        user1_data = {
+            'username': 'username1',
+            'first_name': 'first_name1',
+            'last_name': 'last_name1',
+            'email': 'email1@gmail.com',
+            'password': 'password1',
+            'password2': 'password1',
+            'birthdate': '2021-01-01',
+        }
+        user2_data = {
+            'username': 'username2',
+            'first_name': 'first_name2',
+            'last_name': 'last_name2',
+            'email': 'email2@gmail.com',
+            'password': 'password2',
+            'password2': 'password2',
+            'birthdate': '2021-01-01',
+        }
+        user3_data = {
+            'username': 'username3',
+            'first_name': 'first_name3',
+            'last_name': 'last_name3',
+            'email': 'email3@gmail.com',
+            'password': 'password3',
+            'password2': 'password3',
+            'birthdate': '2021-01-01',
+        }
+        user1 = register_user(user1_data)
+        user2 = register_user(user2_data)
+        user3 = register_user(user3_data)
 
+        user1.profile.friends.add(user2.profile)
+
+        Post.objects.create(author=user1, text='User1 post text')
+        Post.objects.create(author=user2, text='User2 post text')
+        Post.objects.create(author=user3, text='User3 post text')
+
+    def setUp(self):
+        self.client = Client()
+        self.post1 = Post.objects.get(author__username='username1')
+        self.post2 = Post.objects.get(author__username='username2')
+        self.post3 = Post.objects.get(author__username='username3')
+
+    def test_user_liking_his_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:post_like')
+        response = self.client.post(url, {'id': self.post1.pk})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'ok')
+        self.assertTrue(response.json()['action'] == 'liked')
+        self.assertTrue(self.post1.likes.count() == 1)
+
+    def test_user_unliking_his_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        self.post1.likes.add(User.objects.get(username='username1'))
+        url = reverse('site:post_like')
+        response = self.client.post(url, {'id': self.post1.pk})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'ok')
+        self.assertTrue(response.json()['action'] == 'unliked')
+        self.assertTrue(self.post1.likes.count() == 0)
+
+    def test_user_liking_friends_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:post_like')
+        response = self.client.post(url, {'id': self.post2.pk})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'ok')
+        self.assertTrue(response.json()['action'] == 'liked')
+        self.assertTrue(self.post2.likes.count() == 1)
+
+    def test_user_unliking_friends_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        self.post2.likes.add(User.objects.get(username='username1'))
+        url = reverse('site:post_like')
+        response = self.client.post(url, {'id': self.post2.pk})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'ok')
+        self.assertTrue(response.json()['action'] == 'unliked')
+        self.assertTrue(self.post2.likes.count() == 0)
+
+    def test_user_liking_strangers_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:post_like')
+        response = self.client.post(url, {'id': self.post3.pk})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'error')
+        self.assertTrue(self.post3.likes.count() == 0)
 
 
 
