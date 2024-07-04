@@ -659,3 +659,82 @@ class TestCommentLike(TestCase):
         self.assertTrue(self.comment3.likes.count() == 0)
 
 
+class TestPostDetail(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        user1_data = {
+            'username': 'username1',
+            'first_name': 'first_name1',
+            'last_name': 'last_name1',
+            'email': 'email1@gmail.com',
+            'password': 'password1',
+            'password2': 'password1',
+            'birthdate': '2021-01-01',
+        }
+        user2_data = {
+            'username': 'username2',
+            'first_name': 'first_name2',
+            'last_name': 'last_name2',
+            'email': 'email2@gmail.com',
+            'password': 'password2',
+            'password2': 'password2',
+            'birthdate': '2021-01-01',
+        }
+        user3_data = {
+            'username': 'username3',
+            'first_name': 'first_name3',
+            'last_name': 'last_name3',
+            'email': 'email3@gmail.com',
+            'password': 'password3',
+            'password2': 'password3',
+            'birthdate': '2021-01-01',
+        }
+        user1 = register_user(user1_data)
+        user2 = register_user(user2_data)
+        user3 = register_user(user3_data)
+
+        user1.profile.friends.add(user2.profile)
+
+        post1=Post.objects.create(author=user1, text='User1 post text')
+        post2=Post.objects.create(author=user2, text='User2 post text')
+        post3=Post.objects.create(author=user3, text='User3 post text')
+
+        Comment.objects.create(author=user1, post=post1, text='User1 comment post1')
+        Comment.objects.create(author=user2, post=post1, text='User2 comment post1')
+        Comment.objects.create(author=user1, post=post2, text='User1 comment post2')
+        Comment.objects.create(author=user3, post=post2, text='User3 comment post2')
+
+    def setUp(self):
+        self.client = Client()
+        self.post1 = Post.objects.get(text='User1 post text')
+        self.post2 = Post.objects.get(text='User2 post text')
+        self.post3 = Post.objects.get(text='User3 post text')
+
+    def test_user_sees_his_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:post_detail', args=[self.post1.pk])
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, 'site/post/post_detail.html')
+        self.assertInHTML('User1 post text', response.content.decode())
+        self.assertInHTML('User1 comment post1', response.content.decode())
+        self.assertInHTML('User2 comment post1', response.content.decode())
+
+    def test_user_sees_friends_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:post_detail', args=[self.post2.pk])
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, 'site/post/post_detail.html')
+        self.assertInHTML('User2 post text', response.content.decode())
+        self.assertInHTML('User1 comment post2', response.content.decode())
+        self.assertInHTML('User3 comment post2', response.content.decode())
+
+    def test_user_cant_see_strangers_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:post_detail', args=[self.post3.pk])
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, 'site/post/post_no_auth.html')
+        self.assertInHTML('Author of this post is not on your friends list. You need to be friends with the author to see the post.',
+                          response.content.decode())
+
+
