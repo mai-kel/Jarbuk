@@ -343,6 +343,12 @@ h1 {
     width: 1400px;
     margin: auto;
     border: 3px solid #ddd;
+}
+
+#post_no_auth_div{
+    width: 1400px;
+    margin: auto;
+    border: 3px solid #ddd;
     text-align: center;
 }
 
