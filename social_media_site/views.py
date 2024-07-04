@@ -167,9 +167,11 @@ def comment_like(request):
 @login_required
 def post_detail(request, id):
     post = get_object_or_404(Post, pk=id)
+    if post.author.profile not in request.user.profile.friends.all() and post.author != request.user:
+        return render(request, "site/post/post_no_auth.html",)
+
     comment_form = CommentCreateForm()
     comments = post.comments.all().order_by('-creation_date')
-
     return render(request, "site/post/post_detail.html",
                   {"post": post,
                    "comments": comments,
