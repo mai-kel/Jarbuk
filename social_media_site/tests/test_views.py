@@ -738,3 +738,75 @@ class TestPostDetail(TestCase):
                           response.content.decode())
 
 
+class TestCreateComment(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        user1_data = {
+            'username': 'username1',
+            'first_name': 'first_name1',
+            'last_name': 'last_name1',
+            'email': 'email1@gmail.com',
+            'password': 'password1',
+            'password2': 'password1',
+            'birthdate': '2021-01-01',
+        }
+        user2_data = {
+            'username': 'username2',
+            'first_name': 'first_name2',
+            'last_name': 'last_name2',
+            'email': 'email2@gmail.com',
+            'password': 'password2',
+            'password2': 'password2',
+            'birthdate': '2021-01-01',
+        }
+        user3_data = {
+            'username': 'username3',
+            'first_name': 'first_name3',
+            'last_name': 'last_name3',
+            'email': 'email3@gmail.com',
+            'password': 'password3',
+            'password2': 'password3',
+            'birthdate': '2021-01-01',
+        }
+        user1 = register_user(user1_data)
+        user2 = register_user(user2_data)
+        user3 = register_user(user3_data)
+
+        user1.profile.friends.add(user2.profile)
+
+        post1=Post.objects.create(author=user1, text='User1 post text')
+        post2=Post.objects.create(author=user2, text='User2 post text')
+        post3=Post.objects.create(author=user3, text='User3 post text')
+
+    def setUp(self):
+        self.client = Client()
+        self.post1 = Post.objects.get(text='User1 post text')
+        self.post2 = Post.objects.get(text='User2 post text')
+        self.post3 = Post.objects.get(text='User3 post text')
+
+    def test_user_commenting_his_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:create_comment', args=[self.post1.pk])
+        response = self.client.post(url, {'text': 'User1 comment post1'})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'ok')
+        self.assertTrue(Comment.objects.filter(text='User1 comment post1').exists())
+
+    def test_user_commenting_friends_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:create_comment', args=[self.post2.pk])
+        response = self.client.post(url, {'text': 'User1 comment post2'})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'ok')
+        self.assertTrue(Comment.objects.filter(text='User1 comment post2').exists())
+
+    def test_user_cant_comment_strangers_post(self):
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        url = reverse('site:create_comment', args=[self.post3.pk])
+        response = self.client.post(url, {'text': 'User1 comment post3'})
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['status'] == 'error')
+        self.assertFalse(Comment.objects.filter(text='User1 comment post3').exists())
+
+
