@@ -889,3 +889,79 @@ class TestProfileSendInvitation(TestCase):
         self.assertTrue(FriendInvitation.objects.filter(from_who=self.user1, to_who=self.user4).exists())
 
 
+class TestProfileWithdrawInvitation(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        user1_data = {
+            'username': 'username1',
+            'first_name': 'first_name1',
+            'last_name': 'last_name1',
+            'email': 'email1@gmail.com',
+            'password': 'password1',
+            'password2': 'password1',
+            'birthdate': '2021-01-01',
+        }
+        user2_data = {
+            'username': 'username2',
+            'first_name': 'first_name2',
+            'last_name': 'last_name2',
+            'email': 'email2@gmail.com',
+            'password': 'password2',
+            'password2': 'password2',
+            'birthdate': '2021-01-01',
+        }
+        user3_data = {
+            'username': 'username3',
+            'first_name': 'first_name3',
+            'last_name': 'last_name3',
+            'email': 'email3@gmail.com',
+            'password': 'password3',
+            'password2': 'password3',
+            'birthdate': '2021-01-01',
+        }
+
+        user4_data = {
+            'username': 'username4',
+            'first_name': 'first_name4',
+            'last_name': 'last_name4',
+            'email': 'email4@gmail.com',
+            'password': 'password4',
+            'password2': 'password4',
+            'birthdate': '2021-01-01',
+        }
+
+        user1 = register_user(user1_data)
+        user2 = register_user(user2_data)
+        user3 = register_user(user3_data)
+        user4 = register_user(user4_data)
+
+        user1.profile.friends.add(user2.profile)
+        FriendInvitation.objects.create(from_who=user3, to_who=user1)
+        FriendInvitation.objects.create(from_who=user1, to_who=user4)
+
+    def setUp(self):
+        self.client = Client()
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        self.user1 = User.objects.get(username='username1')
+        self.user2 = User.objects.get(username='username2')
+        self.user3 = User.objects.get(username='username3')
+        self.user4 = User.objects.get(username='username4')
+
+    def test_withdraw_invitation_friends(self):
+        url = reverse('site:profile_friendship_withdraw', args=[self.user2.pk])
+        self.client.post(url)
+        self.assertTrue(self.user2.profile in self.user1.profile.friends.all())
+
+    def test_withdraw_received_invitation(self):
+        url = reverse('site:profile_friendship_withdraw', args=[self.user3.pk])
+        self.client.post(url)
+        self.assertTrue(FriendInvitation.objects.filter(from_who=self.user3, to_who=self.user1).exists())
+
+    def test_withdraw_sent_invitation(self):
+        url = reverse('site:profile_friendship_withdraw', args=[self.user4.pk])
+        response = self.client.post(url)
+        print(response.content.decode())
+        self.assertFalse(FriendInvitation.objects.filter(from_who=self.user1, to_who=self.user4).exists())
+
+
