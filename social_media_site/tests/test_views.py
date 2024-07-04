@@ -1,8 +1,6 @@
 from django.test import TestCase, Client
-from django.urls import resolve, reverse
-from django.shortcuts import render
-import social_media_site.views as my_views
-from django.contrib.auth import views as auth_views, get_user
+from django.urls import reverse
+from django.contrib.auth import get_user
 import social_media_site.models as my_models
 from django.contrib.auth.models import User
 from datetime import datetime, date
@@ -1459,4 +1457,207 @@ class TestInvitationsSentWithdraw(TestCase):
         self.assertTrue(self.user3.profile not in self.user1.profile.friends.all())
 
 
+class TestInvitationsReceivedList(TestCase):
 
+    @classmethod
+    def setUpTestData(cls):
+        user1_data = {
+            'username': 'username1',
+            'first_name': 'first_name1',
+            'last_name': 'last_name1',
+            'email': 'email1@gmail.com',
+            'password': 'password1',
+            'password2': 'password1',
+            'birthdate': '2021-01-01',
+        }
+        user2_data = {
+            'username': 'username2',
+            'first_name': 'first_name2',
+            'last_name': 'last_name2',
+            'email': 'email2@gmail.com',
+            'password': 'password2',
+            'password2': 'password2',
+            'birthdate': '2021-01-01',
+        }
+        user3_data = {
+            'username': 'username3',
+            'first_name': 'first_name3',
+            'last_name': 'last_name3',
+            'email': 'email3@gmail.com',
+            'password': 'password3',
+            'password2': 'password3',
+            'birthdate': '2021-01-01',
+        }
+
+        user4_data = {
+            'username': 'username4',
+            'first_name': 'first_name4',
+            'last_name': 'last_name4',
+            'email': 'email4@gmail.com',
+            'password': 'password4',
+            'password2': 'password4',
+            'birthdate': '2021-01-01',
+        }
+
+        user1 = register_user(user1_data)
+        user2 = register_user(user2_data)
+        user3 = register_user(user3_data)
+        user4 = register_user(user4_data)
+
+        user1.profile.friends.add(user2.profile)
+        FriendInvitation.objects.create(from_who=user1, to_who=user3)
+        FriendInvitation.objects.create(from_who=user4, to_who=user1)
+
+    def setUp(self):
+        self.client = Client()
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        self.user1 = User.objects.get(username='username1')
+        self.user2 = User.objects.get(username='username2')
+        self.user3 = User.objects.get(username='username3')
+        self.user4 = User.objects.get(username='username4')
+
+    def test_invitations_received_list(self):
+        url = reverse('site:invitations_received')
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, 'site/friends/invitations_received.html')
+        self.assertInHTML('first_name4 last_name4', response.content.decode())
+        self.assertNotContains(response, 'first_name2 last_name2')
+        self.assertNotContains(response, 'first_name3 last_name3')
+
+
+class TestInvitationsReceivedAccept(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        user1_data = {
+            'username': 'username1',
+            'first_name': 'first_name1',
+            'last_name': 'last_name1',
+            'email': 'email1@gmail.com',
+            'password': 'password1',
+            'password2': 'password1',
+            'birthdate': '2021-01-01',
+        }
+        user2_data = {
+            'username': 'username2',
+            'first_name': 'first_name2',
+            'last_name': 'last_name2',
+            'email': 'email2@gmail.com',
+            'password': 'password2',
+            'password2': 'password2',
+            'birthdate': '2021-01-01',
+        }
+        user3_data = {
+            'username': 'username3',
+            'first_name': 'first_name3',
+            'last_name': 'last_name3',
+            'email': 'email3@gmail.com',
+            'password': 'password3',
+            'password2': 'password3',
+            'birthdate': '2021-01-01',
+        }
+
+        user4_data = {
+            'username': 'username4',
+            'first_name': 'first_name4',
+            'last_name': 'last_name4',
+            'email': 'email4@gmail.com',
+            'password': 'password4',
+            'password2': 'password4',
+            'birthdate': '2021-01-01',
+        }
+
+        user1 = register_user(user1_data)
+        user2 = register_user(user2_data)
+        user3 = register_user(user3_data)
+        user4 = register_user(user4_data)
+
+        user1.profile.friends.add(user2.profile)
+        FriendInvitation.objects.create(from_who=user1, to_who=user3)
+        FriendInvitation.objects.create(from_who=user4, to_who=user1)
+
+    def setUp(self):
+        self.client = Client()
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        self.user1 = User.objects.get(username='username1')
+        self.user2 = User.objects.get(username='username2')
+        self.user3 = User.objects.get(username='username3')
+        self.user4 = User.objects.get(username='username4')
+
+    def test_invitations_received_accept(self):
+        self.assertTrue(FriendInvitation.objects.filter(from_who=self.user4, to_who=self.user1).exists())
+        url = reverse('site:invitations_received_accept', args=[self.user4.pk])
+        self.client.post(url)
+        self.assertTrue(self.user4.profile in self.user1.profile.friends.all())
+        self.assertFalse(FriendInvitation.objects.filter(from_who=self.user4, to_who=self.user1).exists())
+        self.assertTrue(FriendInvitation.objects.filter(from_who=self.user1, to_who=self.user3).exists())
+        self.assertTrue(self.user1.profile.friends.count() == 2)
+
+
+class TestInvitationsReceivedDecline(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        user1_data = {
+            'username': 'username1',
+            'first_name': 'first_name1',
+            'last_name': 'last_name1',
+            'email': 'email1@gmail.com',
+            'password': 'password1',
+            'password2': 'password1',
+            'birthdate': '2021-01-01',
+        }
+        user2_data = {
+            'username': 'username2',
+            'first_name': 'first_name2',
+            'last_name': 'last_name2',
+            'email': 'email2@gmail.com',
+            'password': 'password2',
+            'password2': 'password2',
+            'birthdate': '2021-01-01',
+        }
+        user3_data = {
+            'username': 'username3',
+            'first_name': 'first_name3',
+            'last_name': 'last_name3',
+            'email': 'email3@gmail.com',
+            'password': 'password3',
+            'password2': 'password3',
+            'birthdate': '2021-01-01',
+        }
+
+        user4_data = {
+            'username': 'username4',
+            'first_name': 'first_name4',
+            'last_name': 'last_name4',
+            'email': 'email4@gmail.com',
+            'password': 'password4',
+            'password2': 'password4',
+            'birthdate': '2021-01-01',
+        }
+
+        user1 = register_user(user1_data)
+        user2 = register_user(user2_data)
+        user3 = register_user(user3_data)
+        user4 = register_user(user4_data)
+
+        user1.profile.friends.add(user2.profile)
+        FriendInvitation.objects.create(from_who=user1, to_who=user3)
+        FriendInvitation.objects.create(from_who=user4, to_who=user1)
+
+    def setUp(self):
+        self.client = Client()
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        self.user1 = User.objects.get(username='username1')
+        self.user2 = User.objects.get(username='username2')
+        self.user3 = User.objects.get(username='username3')
+        self.user4 = User.objects.get(username='username4')
+
+    def test_invitations_received_decline(self):
+        self.assertTrue(FriendInvitation.objects.filter(from_who=self.user4, to_who=self.user1).exists())
+        url = reverse('site:invitations_received_decline', args=[self.user4.pk])
+        self.client.post(url)
+        self.assertFalse(self.user4.profile in self.user1.profile.friends.all())
+        self.assertFalse(FriendInvitation.objects.filter(from_who=self.user4, to_who=self.user1).exists())
+        self.assertTrue(FriendInvitation.objects.filter(from_who=self.user1, to_who=self.user3).exists())
+        self.assertTrue(self.user1.profile.friends.count() == 1)
