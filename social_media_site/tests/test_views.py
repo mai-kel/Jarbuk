@@ -1258,3 +1258,67 @@ class TestFriendsList(TestCase):
         self.assertNotContains(response, 'firstname4 lastname4')
 
 
+class TestDeleteFriendsFriendlist(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        user1_data = {
+            'username': 'username1',
+            'first_name': 'first_name1',
+            'last_name': 'last_name1',
+            'email': 'email1@gmail.com',
+            'password': 'password1',
+            'password2': 'password1',
+            'birthdate': '2021-01-01',
+        }
+        user2_data = {
+            'username': 'username2',
+            'first_name': 'first_name2',
+            'last_name': 'last_name2',
+            'email': 'email2@gmail.com',
+            'password': 'password2',
+            'password2': 'password2',
+            'birthdate': '2021-01-01',
+        }
+        user3_data = {
+            'username': 'username3',
+            'first_name': 'first_name3',
+            'last_name': 'last_name3',
+            'email': 'email3@gmail.com',
+            'password': 'password3',
+            'password2': 'password3',
+            'birthdate': '2021-01-01',
+        }
+
+        user4_data = {
+            'username': 'username4',
+            'first_name': 'first_name4',
+            'last_name': 'last_name4',
+            'email': 'email4@gmail.com',
+            'password': 'password4',
+            'password2': 'password4',
+            'birthdate': '2021-01-01',
+        }
+
+        user1 = register_user(user1_data)
+        user2 = register_user(user2_data)
+        user3 = register_user(user3_data)
+        user4 = register_user(user4_data)
+
+        user1.profile.friends.add(user2.profile)
+        user1.profile.friends.add(user3.profile)
+
+    def setUp(self):
+        self.client = Client()
+        login_client(self.client, {'username': 'username1', 'password': 'password1'})
+        self.user1 = User.objects.get(username='username1')
+        self.user2 = User.objects.get(username='username2')
+        self.user3 = User.objects.get(username='username3')
+        self.user4 = User.objects.get(username='username4')
+
+    def test_delete_friends_friendlist(self):
+        self.assertTrue(self.user2.profile in self.user1.profile.friends.all())
+        url = reverse('site:friends_list_delete', args=[self.user2.pk])
+        self.client.post(url)
+        self.assertFalse(self.user2.profile in self.user1.profile.friends.all())
+        self.assertTrue(self.user3.profile in self.user1.profile.friends.all())
+        self.assertFalse(self.user1.profile in self.user4.profile.friends.all())
