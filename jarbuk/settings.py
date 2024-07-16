@@ -29,6 +29,7 @@ ALLOWED_HOSTS = []
 
 # Application definition
 INSTALLED_APPS = [
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -36,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'social_media_site.apps.SocialMediaSiteConfig',
+    'chat.apps.ChatConfig',
     'easy_thumbnails',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -68,6 +71,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'jarbuk.wsgi.application'
+ASGI_APPLICATION = 'jarbuk.asgi.application'
 
 
 # Database
