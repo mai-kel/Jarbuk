@@ -71,8 +71,17 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'jarbuk.wsgi.application'
-ASGI_APPLICATION = 'jarbuk.asgi.application'
 
+# Channels
+ASGI_APPLICATION = "jarbuk.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -140,6 +149,7 @@ THUMBNAIL_ALIASES = {
         'profile_pp': {'size': (0, 300), 'crop': False},
         'profile_cp': {'size': (1400, 0), 'crop': False},
         'post_photo': {'size': (0, 600), 'crop': False},
-        'friend_pp': {'size': (0, 300), 'crop': False}
+        'friend_pp': {'size': (0, 300), 'crop': False},
+        'msg_pp': {'size': (50, 0), 'crop': False},
     },
 }
