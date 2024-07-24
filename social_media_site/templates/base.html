@@ -42,6 +42,10 @@
                     <li>
                         <a href="{% url 'site:user_detail' id=request.user.pk%}">My profile</a>
                     </li>
+
+                    <li>
+                        <a href="{% url 'chat:list_chats' %}">Chat</a>
+                    </li>
                 </div>
 
                 <span class="logout">

@@ -1,0 +1,29 @@
+{% load thumbnail %}
+{% load static %}
+
+<div id="chat_detail">
+    <div id=chat_name> {{ chat_name }} </div>
+    <div id="chat_messages">
+        {% for message in messages %}
+            <div class="message" data-author={% if request.user == message.author %} "logged_user" {% else %} "other_user" {% endif %}>
+                <div class="message_date"> {{ message.creation_date }} </div>
+                <div class="msg_author_pp_div">
+                    {% if message.author.profile.profile_photo %}
+                        <img class="msg_pp" src="{{ message.author.profile.profile_photo|thumbnail_url:'msg_pp' }}">
+                    {% else %}
+                        <img class="msg_pp" src="{% static 'default_img/profile_def.png'|thumbnail_url:'msg_pp' %}">
+                    {% endif %}
+                </div>
+                <div class="message_author"> {{ message.author.first_name}} {{message.author.last_name}} </div>
+                <div class="message_text"> {{ message.text }} </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div id="chat_input">
+        <form id="message_form">
+            <input type="text" id="message_input">
+            <input type="submit" value="Send">
+        </form>
+    </div>
+</div>

@@ -1,0 +1,24 @@
+
+{% load get_chat_name %}
+{% load get_chat_type %}
+{% load static %}
+
+<script src="{% static 'js/chat.js' %}"></script>
+<link href="{% static "css/chat.css" %}" rel="stylesheet">
+
+<div id="chats_list">
+    {% for chat, message in chats_with_messages %}
+        <div class="chat_element" data-chat_pk="{{chat.pk}}" data-chat_type="{% get_chat_type chat %}">
+            <div class="chat_element_name">
+                {% get_chat_name chat request.user %}
+            </div>
+
+            <div class="chat_last_message">
+                {{ message.text }}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<div id="main_chat"> </div>
+
