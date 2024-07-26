@@ -1,4 +1,3 @@
-
 function message_received(data){
     const main_chat_div = document.getElementById("main_chat");
     let main_chat_type = main_chat_div.getAttribute("data-chat_type");
@@ -6,7 +5,7 @@ function message_received(data){
 
     if (main_chat_type == data.chat_type && main_chat_pk == data.chat_pk){
         const messages_div = document.getElementById("chat_messages");
-        const url =  "/chat/get-message/" + data.message_type + "/" + data.message_pk + "/";
+        const url =  (data.message_type == "group_message") ? "/chat/group-message/" + data.message_pk + "/" : "/chat/private-message/" + data.message_pk + "/";
         var options = {
             method: 'GET',
             mode: 'same-origin'
@@ -14,11 +13,12 @@ function message_received(data){
 
         // send HTTP request
         fetch(url, options)
-        .then(response => response.text())
+        .then(response => response.json())
         .then(data => {
-
-            messages_div.innerHTML += data;
-            main_chat_div.scrollTop = main_chat_div.scrollHeight
+            if (data['status'] != "error"){
+                messages_div.innerHTML += data['rendered_message'];
+                main_chat_div.scrollTop = main_chat_div.scrollHeight
+            }
         });
     }
 
@@ -61,7 +61,7 @@ function connect() {
 
 }
 
-function form_submit(event){
+function chat_form_submit(event){
     event.preventDefault();
         const message_input = document.getElementById("message_input");
         const message = message_input.value;
@@ -86,18 +86,20 @@ window.addEventListener('DOMContentLoaded', function () {
         let chat_type = element.getAttribute("data-chat_type");
         let chat_pk = element.getAttribute("data-chat_pk");
 
-        const url =  "/chat/get-chat/" + chat_type + "/" + chat_pk + "/";
+        const url = (chat_type == "group_chat") ? "/chat/group-chat/" + chat_pk + "/" : "/chat/private-chat/" + chat_pk + "/";
         let options = {
             method: 'GET',
             mode: 'same-origin'
         }
 
-        fetch(url, options).then(response => response.text()).then(data => {
-            main_chat_div.innerHTML = data;
-            main_chat_div.setAttribute("data-chat_type", chat_type);
-            main_chat_div.setAttribute("data-chat_pk", chat_pk);
-            document.getElementById("message_form").addEventListener('submit', form_submit);
-            main_chat_div.scrollTop = main_chat_div.scrollHeight
+        fetch(url, options).then(response => response.json()).then(data => {
+            if (data['status'] != "error"){
+                main_chat_div.innerHTML = data['rendered_chat'];
+                main_chat_div.setAttribute("data-chat_type", chat_type);
+                main_chat_div.setAttribute("data-chat_pk", chat_pk);
+                document.getElementById("message_form").addEventListener('submit', chat_form_submit);
+                main_chat_div.scrollTop = main_chat_div.scrollHeight
+            }
         });
     }));
 

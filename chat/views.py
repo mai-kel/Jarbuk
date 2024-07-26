@@ -4,8 +4,10 @@ from django.views.decorators.http import require_http_methods
 from .models import GroupChat, PrivateChat, GroupMessage, PrivateMessage
 from django.db.models import Q
 from itertools import chain
+from django.http import JsonResponse
 
 
+@require_http_methods(['GET'])
 @login_required
 def list_chats(request):
     group_chats = request.user.group_chats.all()
@@ -21,30 +23,61 @@ def list_chats(request):
                   {'chats_with_messages': all_chats_with_last_message})
 
 
+@require_http_methods(['GET'])
 @login_required
-def get_rendered_chat(request, chat_id, chat_type):
-    if chat_type == "private_chat":
-        chat = PrivateChat.objects.get(id=chat_id)
-        messages = chat.private_messages.all()
-    else:
-        chat = GroupChat.objects.get(id=chat_id)
-        messages = chat.group_messages.all()
-
-    return render(request, 'chat/chat_detail.html',
-                    {'chat': chat,
-                     'messages': messages})
+def get_rendered_private_chat(request, chat_pk):
+    return get_rendered_chat(request, chat_pk, PrivateChat)
 
 
+@require_http_methods(['GET'])
 @login_required
-def get_rendered_message(request, message_id, message_type):
-    if message_type == "private_message":
-        message = PrivateMessage.objects.get(id=message_id)
-    else:
-        message = GroupMessage.objects.get(id=message_id)
-
-    return render(request, 'chat/message.html',
-                  {'message': message})
+def get_rendered_group_chat(request, chat_pk):
+    return get_rendered_chat(request, chat_pk, GroupChat)
 
 
+def get_rendered_chat(request, chat_pk, model: GroupChat|PrivateChat):
+    data = {}
+    chat = model.objects.get(pk=chat_pk)
+    if chat is None:
+        data['status'] = 'error'
+        data['message'] = 'Chat not found'
+        return JsonResponse(data, status=404)
+    if request.user not in chat.participants.all():
+        data['status'] = 'error'
+        data['message'] = 'You are not a participant of this chat'
+        return JsonResponse(data, status=403)
+
+    data['status'] = 'ok'
+    data['rendered_chat'] = chat.render(request)
+    return JsonResponse(data, status=200)
+
+
+@require_http_methods(['GET'])
+@login_required
+def get_rendered_private_message(request, message_pk):
+    return get_rendered_message(request, message_pk, PrivateMessage)
+
+
+@require_http_methods(['GET'])
+@login_required
+def get_rendered_group_message(request, message_pk):
+    return get_rendered_message(request, message_pk, GroupMessage)
+
+
+def get_rendered_message(request, message_pk, model: GroupMessage|PrivateMessage):
+    data = {}
+    message = model.objects.get(pk=message_pk)
+    if message is None:
+        data['status'] = 'error'
+        data['message'] = 'Message not found'
+        return JsonResponse(data, status=404)
+    if request.user not in message.destination.participants.all():
+        data['status'] = 'error'
+        data['message'] = 'You are not a participant of the chat, where this message was sent'
+        return JsonResponse(data, status=403)
+
+    data['status'] = 'ok'
+    data['rendered_message'] = message.render(request)
+    return JsonResponse(data, status=200)
 
 
