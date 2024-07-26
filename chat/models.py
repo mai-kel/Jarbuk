@@ -51,6 +51,11 @@ class Message(models.Model):
     class Meta:
         abstract = True
 
+    def render(self, request):
+        return render_to_string('chat/message.html',
+                                {'message': self},
+                                request)
+
 
 class GroupMessage(Message):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='group_messages_sent')
