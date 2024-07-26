@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.template.loader import render_to_string
 
 
 class GroupChat(models.Model):
@@ -15,6 +16,12 @@ class GroupChat(models.Model):
             return last_message.creation_date
         return None
 
+    def render(self, request):
+        return render_to_string('chat/chat_detail.html',
+                                {'chat': self,
+                                 'messages': self.group_messages.all().order_by('creation_date')},
+                                request)
+
 
 class PrivateChat(models.Model):
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='private_chats')
@@ -27,6 +34,12 @@ class PrivateChat(models.Model):
         if last_message is not None:
             return last_message.creation_date
         return None
+
+    def render(self, request):
+        return render_to_string('chat/chat_detail.html',
+                                {'chat': self,
+                                 'messages': self.private_messages.all().order_by('creation_date')},
+                                request)
 
 
 
