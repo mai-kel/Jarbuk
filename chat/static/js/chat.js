@@ -16,8 +16,12 @@ function message_received(data){
         .then(response => response.json())
         .then(data => {
             if (data['status'] != "error"){
+                var chat_messages_div = document.getElementById("chat_messages");
+                var scroll_value = chat_messages_div.scrollHeight - chat_messages_div.clientHeight - chat_messages_div.scrollTop;
                 messages_div.innerHTML += data['rendered_message'];
-                main_chat_div.scrollTop = main_chat_div.scrollHeight
+                if (scroll_value < 200){
+                    chat_messages_div.scrollTop = chat_messages_div.scrollHeight;
+                }
             }
         });
     }
@@ -98,7 +102,8 @@ window.addEventListener('DOMContentLoaded', function () {
                 main_chat_div.setAttribute("data-chat_type", chat_type);
                 main_chat_div.setAttribute("data-chat_pk", chat_pk);
                 document.getElementById("message_form").addEventListener('submit', chat_form_submit);
-                main_chat_div.scrollTop = main_chat_div.scrollHeight
+                var chat_messages_div = document.getElementById("chat_messages");
+                chat_messages_div.scrollTop = chat_messages_div.scrollHeight;
             }
         });
     }));

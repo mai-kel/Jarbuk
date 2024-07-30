@@ -1,18 +1,17 @@
 {% load thumbnail %}
 {% load static %}
 
-<div id="chat_detail">
-    <div id=chat_name> {{ chat_name }} </div>
-    <div id="chat_messages">
-        {% for message in messages %}
-            {% include 'chat/message.html' with message=message %}
-        {% endfor %}
-    </div>
+<div id=chat_name> {{ chat_name }} </div>
 
-    <div id="chat_input">
-        <form id="message_form">
-            <input type="text" id="message_input">
-            <input type="submit" value="Send">
-        </form>
-    </div>
+<div id="chat_messages">
+    {% for message in messages %}
+        {% include 'chat/message.html' with message=message %}
+    {% endfor %}
+</div>
+
+<div id="chat_input">
+    <form id="message_form">
+        <input type="text" id="message_input">
+        <input type="submit" value="Send">
+    </form>
 </div>

@@ -1,8 +1,9 @@
-body {
+#chat_content_wrapper {
     display: flex;
-    height: 100vh;
-    margin: 0;
+    /* margin: 0; */
     font-family: Arial, sans-serif;
+    height: 100%;
+    overflow-y: ;
 }
 
 #chats_list {
@@ -34,23 +35,15 @@ body {
     color: #888;
     font-size: 0.9em;
     margin-top: 5px;
+    word-break:break-all;
 }
 
 #main_chat {
     width: 75%;
     display: flex;
     flex-direction: column;
-    background-color: #e5ddd5;
-    overflow-y: auto;
-
 }
 
-#chat_detail {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
 
 #chat_name {
     padding: 15px;
@@ -64,28 +57,51 @@ body {
     padding: 15px;
     display: flex;
     flex-direction: column;
-    margin-bottom: 60px;  /* Leave space for the chat input */
+    /* margin-bottom: 55px; */
+    background-color: #e5ddd5;
+    position: relative;
+    overflow-y: auto;
 }
 
 .message {
     margin-bottom: 15px;
-    display: flex;
-    align-items: flex-start;
-    background-color: white;
-    border-radius: 10px;
-    padding: 10px;
-    max-width: 60%;
+    max-width: 80%;
 }
 
-.message[data-author="logged_user"] {
+.profile_picture_text_wrapper {
+    display: flex;
+}
+
+.author_date_wrapper {
+    display: flex;
+}
+
+.message[data-author="logged_user"]{
     align-self: flex-end;
+}
+
+.message[data-author="other_user"] {
+    align-self: flex-start;
+}
+
+.message[data-author="logged_user"] .message_text {
     background-color: #dcf8c6;
+}
+
+.message[data-author="logged_user"] .profile_picture_text_wrapper {
+    float: right;
+}
+
+.message[data-author="other_user"] .message_text{
+    background-color: white;
 }
 
 .message_date {
     font-size: 0.75em;
     color: #999;
     margin-bottom: 5px;
+    display: flex;
+    align-self: flex-end;
 }
 
 .msg_author_pp_div {
@@ -100,19 +116,25 @@ body {
 
 .message_author {
     font-weight: bold;
+    margin-right: 10px;
     margin-bottom: 5px;
+    display: flex;
+    align-self: flex-end;
 }
 
 .message_text {
+    word-break: break-all;
+    border-radius: 15px;
     padding: 10px;
-    border-radius: 5px;
+    display: flex;
+    font-size: 1.5em;;
 }
 
 #chat_input {
     padding: 10px;
     border-top: 1px solid #ddd;
     background-color: #f7f7f7;
-    position: absolute;
+    /* position: absolute; */
     bottom: 0;
     width: 100%;
     box-sizing: border-box;
