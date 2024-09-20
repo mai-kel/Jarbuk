@@ -6,6 +6,9 @@ from django.template.loader import render_to_string
 class GroupChat(models.Model):
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='group_chats')
     name = models.CharField(max_length=50)
+    admins = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='admin_group_chats', blank=True)
+    group_image = models.ImageField(upload_to='chat/images/%Y/%m/%d/', blank=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='owned_group_chats')
 
     def get_last_message(self):
         return self.group_messages.last()
@@ -16,11 +19,11 @@ class GroupChat(models.Model):
             return last_message.creation_date
         return None
 
-    def render(self, request):
-        return render_to_string('chat/chat_detail.html',
-                                {'chat': self,
-                                 'messages': self.group_messages.all().order_by('creation_date')},
-                                request)
+    # def render(self, request):
+    #     return render_to_string('chat/chat_detail.html',
+    #                             {'chat': self,
+    #                              'messages': self.group_messages.all().order_by('creation_date')},
+    #                             request)
 
 
 class PrivateChat(models.Model):
@@ -35,11 +38,11 @@ class PrivateChat(models.Model):
             return last_message.creation_date
         return None
 
-    def render(self, request):
-        return render_to_string('chat/chat_detail.html',
-                                {'chat': self,
-                                 'messages': self.private_messages.all().order_by('creation_date')},
-                                request)
+    # def render(self, request):
+    #     return render_to_string('chat/chat_detail.html',
+    #                             {'chat': self,
+    #                              'messages': self.private_messages.all().order_by('creation_date')},
+    #                             request)
 
 
 
