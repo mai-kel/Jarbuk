@@ -4,6 +4,7 @@ from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from .models import PrivateChat, GroupChat, PrivateMessage, GroupMessage
 from django.utils.html import escape
+from django.template import defaultfilters
 
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
@@ -51,16 +52,18 @@ class ChatConsumer(WebsocketConsumer):
             message_type = "group_message"
             new_message = GroupMessage.objects.create(destination=chat, author=self.user, text=message)
             message_pk = new_message.pk
-
+        author_name = self.user.first_name + " " + self.user.last_name
         async_to_sync(self.channel_layer.group_send)(
             group_name, {"type": "chat.message",
-                                   "message": escape(message),
+                                   "message": escape(defaultfilters.truncatechars(message, 30)),
+                                   "author_name": author_name,
                                    "chat_pk": chat_pk,
                                    "chat_type": chat_type,
                                    "author_pk": self.user.pk,
                                    "message_type": message_type,
                                    "message_pk": message_pk}
         )
+
 
 
     def chat_message(self, event):
