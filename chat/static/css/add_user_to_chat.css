@@ -1,0 +1,96 @@
+
+
+#add_user_to_wrapper{
+    border-radius: 10px;
+    margin-top: 20px;
+    background-color: #e5ddd5;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: auto;
+    /* height: 100%; */
+}
+
+#add_user_to_chat_content{
+    width: 50%;
+}
+
+#return_to_messages{
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding-left: 20px;
+}
+
+#return_to_messages_button{
+    background-color: #555;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.chat_user {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.chat_user_image {
+    margin-right: 10px;
+}
+
+.chat_user_pp {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+}
+
+.chat_user_name a {
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.chat_user_name a:hover {
+    text-decoration: underline;
+}
+
+#users_to_add_list{
+    height: 500px;
+    overflow-y: auto;
+}
+
+#add_user_to_chat_label{
+    font-size: 48px;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 80px;
+}
+
+#look_for_user{
+    margin-bottom: 10px;
+}
+
+.add_user_div{
+    /* margin-left: 10px; */
+    background-color: #555;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 3px;
+    color: #fff;
+    border: none;
+    margin-left: auto;
+}
+
+.add_user_div:hover{
+    background-color:  #777c81;
+}
+
+
+

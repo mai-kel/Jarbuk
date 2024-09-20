@@ -1,0 +1,47 @@
+{% load thumbnail %}
+{% load static %}
+
+<div class="chat_user">
+    <div class="chat_user_image">
+        {% if user.profile.profile_photo %}
+            <img class="chat_user_pp" src="{{user.profile.profile_photo|thumbnail_url:'chat_user_pp'}}">
+        {% else %}
+            <img class="chat_user_pp" src="{% static 'default_img/profile_def.png' %}">
+        {% endif %}
+    </div>
+
+    <div class="chat_user_name">
+        <a href="{% url 'site:user_detail' user.pk %}">{{user.first_name}} {{user.last_name}}</a>
+    </div>
+
+    {% if logged_user_role == 'owner' %}
+        {% if rendered_user_role == 'admin' %}
+            <div class="manage_user_dropdown" data-user_pk="{{user.pk}}">
+                <button class="manage_user_dropdown_button">Manage</button>
+                <div class="dropdown-content">
+                    <div class="remove_from_group">Remove from group</div>
+                    <div class="remove_from_admins">Remove from admins</div>
+                    <div class="transfer_ownership">Transfer ownership</div>
+                </div>
+            </div>
+        {% elif rendered_user_role == 'participant' %}
+            <div class="manage_user_dropdown" data-user_pk="{{user.pk}}">
+                <button class="manage_user_dropdown_button">Manage</button>
+                <div class="dropdown-content">
+                    <div class="remove_from_group">Remove from group</div>
+                    <div class="add_to_admins">Add to admins</div>
+                    <div class="transfer_ownership">Transfer ownership</div>
+                </div>
+            </div>
+        {% endif %}
+    {% elif logged_user_role == 'admin' %}
+        {% if rendered_user_role == 'participant' %}
+            <div class="manage_user_dropdown" data-user_pk="{{user.pk}}">
+                <button class="manage_user_dropdown_button">Manage</button>
+                <div class="dropdown-content">
+                    <div class="remove_from_group">Remove from group</div>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>

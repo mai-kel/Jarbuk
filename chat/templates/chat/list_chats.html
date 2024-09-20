@@ -11,16 +11,11 @@
 
     <div id="chat_content_wrapper">
         <div id="chats_list">
+            <div id="create_chat_div">
+                <button type="button" id="create_chat_button"> Create chat </button>
+            </div>
             {% for chat, message in chats_with_messages %}
-                <div class="chat_element" data-chat_pk="{{chat.pk}}" data-chat_type="{% get_chat_type chat %}">
-                    <div class="chat_element_name">
-                        {% get_chat_name chat request.user %}
-                    </div>
-
-                    <div class="chat_last_message">
-                        {{ message.text|truncatechars:30}}
-                    </div>
-                </div>
+                {% include 'chat/chat_element.html' %}
             {% endfor %}
         </div>
 

@@ -1,0 +1,11 @@
+{% load static %}
+<link href="{% static "css/create_group_chat.css" %}" rel="stylesheet">
+
+<div id="create_chat_form_wrapper">
+    <form method="post" action="{% url 'chat:create_group_chat' %}" enctype="multipart/form-data" id="create_chat_form">
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type="submit" id="create_chat_input" value="Create chat">
+    </form>
+</div>
+

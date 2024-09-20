@@ -1,0 +1,22 @@
+{% load get_chat_name %}
+{% load get_chat_type %}
+{% load get_chat_image %}
+
+<div class="chat_element" data-chat_pk="{{chat.pk}}" data-chat_type="{% get_chat_type chat %}">
+    <div class="chat_element_image_div">
+        <img class="chat_element_image" src="{% get_chat_image chat request.user %}">
+    </div>
+
+    <div class="chat_element_name_last_message_wrapper">
+        <div class="chat_element_name">
+            {% get_chat_name chat request.user %}
+        </div>
+
+        <div class="chat_last_message">
+            {% if message %}
+                {{ message.author.first_name }} {{ message.author.last_name }}: {{ message.text|truncatechars:30 }}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
