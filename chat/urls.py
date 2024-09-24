@@ -24,4 +24,12 @@ urlpatterns=[
     path('group-chat-transfer-ownership/', views.transfer_ownership, name='transfer_ownership'),
     path('group-chat-delete/', views.delete_group_chat, name='delete_group_chat'),
     path('group-chat-leave/', views.leave_group_chat, name='leave_group_chat'),
+    path('group-chat/paginated-messages/<int:chat_pk>/',
+         views.get_paginated_group_chat_messages, name='get_group_chat_messages'),
+    path('group-chat/paginated-messages/<int:chat_pk>/<str:before_cursor>/',
+         views.get_paginated_group_chat_messages, name='get_group_chat_messages_cursor_given'),
+    path('private-chat/paginated-messages/<int:chat_pk>/',
+         views.get_paginated_private_chat_messages, name='get_private_chat_messages'),
+    path('private-chat/paginated-messages/<int:chat_pk>/<str:before_cursor>/',
+         views.get_paginated_private_chat_messages, name='get_private_chat_messages_cursor_given'),
 ]

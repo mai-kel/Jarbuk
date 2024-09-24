@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from .forms import GroupChatForm
 from django.contrib import messages
 from easy_thumbnails.files import get_thumbnailer
+from cursor_pagination import CursorPaginator
 
 
 @require_http_methods(['GET'])
@@ -57,15 +58,24 @@ def determine_users_group_chat_role(user: User, chat: GroupChat|PrivateChat)->st
         else:
             return 'none'
 
+
 def render_chat_to_string(chat: GroupChat|PrivateChat, request)->str:
     if isinstance(chat, GroupChat):
-        messages = chat.group_messages.all().order_by('creation_date')
+        qs = chat.group_messages.all()
     else:
-        messages = chat.private_messages.all().order_by('creation_date')
+        qs = chat.private_messages.all()
+    page_size = 10
+    paginator = CursorPaginator(qs, ordering=('creation_date', 'id'))
+    page = paginator.page(last=page_size, before=None)
+    messages = [message for message in page]
+    if page.has_previous:
+        messages = messages[1:]
     return render_to_string('chat/chat_detail.html',
                             {'chat': chat,
                              'messages': messages,
-                             'user_role': determine_users_group_chat_role(request.user, chat)},
+                             'user_role': determine_users_group_chat_role(request.user, chat),
+                             'has_previous_page': page.has_previous,
+                             'first_cursor': paginator.cursor(page[0])},
                             request)
 
 
@@ -503,3 +513,39 @@ def change_chat_name(request):
         data['status'] = 'error'
         data['message'] = 'You have no permission to change the name of this chat'
         return JsonResponse(data, status=403)
+
+
+def get_chat_messages(request, chat_pk, model, before_cursor=None):
+    chat = get_object_or_404(model, pk=chat_pk)
+    if request.user not in chat.participants.all():
+        return JsonResponse({'status': 'error', 'message': 'You are not a participant of this chat'}, status=403)
+
+    qs = chat.group_messages.all() if isinstance(chat, GroupChat) else chat.private_messages.all()
+    page_size = 10+1
+    paginator = CursorPaginator(qs, ordering=('creation_date', 'id'))
+    page = paginator.page(last=page_size, before=before_cursor)
+    messages = [message for message in page]
+    if page.has_previous:
+        messages = messages[1:]
+    rendered_messages = render_to_string('chat/rendered_messages.html',
+                                         {'messages': messages},
+                                         request=request)
+    data = {
+        'status': 'ok',
+        'rendered_template': rendered_messages,
+        'has_previous_page': page.has_previous,
+        'first_cursor': paginator.cursor(page[0]),
+    }
+    return JsonResponse(data, status=200)
+
+
+@require_http_methods(['GET'])
+@login_required
+def get_paginated_private_chat_messages(request, chat_pk, before_cursor=None):
+    return get_chat_messages(request, chat_pk, PrivateChat, before_cursor)
+
+
+@require_http_methods(['GET'])
+@login_required
+def get_paginated_group_chat_messages(request, chat_pk, before_cursor=None):
+    return get_chat_messages(request, chat_pk, GroupChat, before_cursor)
