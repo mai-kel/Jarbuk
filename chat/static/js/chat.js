@@ -520,6 +520,37 @@ function chat_form_submit(event){
 }
 
 
+function set_infinite_scroll_pagination_in_chat(){
+    let chat_messages_div = document.getElementById("chat_messages");
+    chat_messages_div.addEventListener('scroll', function(){
+        if (chat_messages_div.scrollTop == 0){
+            let chosen_chat_content_wrapper = document.getElementById("chosen_chat_content_wrapper");
+            let is_more_messages = (chosen_chat_content_wrapper.getAttribute("data-has_previous_page").toLowerCase() === "true");
+            if (is_more_messages){
+                let first_cursor = chosen_chat_content_wrapper.getAttribute("data-first_cursor");
+                let chat_pk = document.getElementById("main_chat").getAttribute("data-chat_pk");
+                let chat_type = document.getElementById("main_chat").getAttribute("data-chat_type");
+                let url = (chat_type == "group_chat") ? "/chat/group-chat/paginated-messages/" : "/chat/private-chat/paginated-messages/";
+                url += chat_pk + "/" + first_cursor + "/";
+                let options = {
+                    method: 'GET',
+                    mode: 'same-origin'
+                }
+                fetch(url, options).then(response => response.json()).then(data => {
+                    if (data['status'] === "ok"){
+                        let old_scroll_height = chat_messages_div.scrollHeight;
+                        chat_messages_div.insertAdjacentHTML("afterbegin", data["rendered_template"]);
+                        chat_messages_div.scrollTop = chat_messages_div.scrollHeight - old_scroll_height;
+                        chosen_chat_content_wrapper.setAttribute("data-first_cursor", data["first_cursor"]);
+                        chosen_chat_content_wrapper.setAttribute("data-has_previous_page", data["has_previous_page"]);
+                    }
+                });
+            }
+        }
+    });
+}
+
+
 function set_chosen_chat(main_chat_div, chat_type, chat_pk){
     const url = (chat_type == "group_chat") ? "/chat/group-chat/" + chat_pk + "/" : "/chat/private-chat/" + chat_pk + "/";
     let options = {
@@ -545,6 +576,7 @@ function set_chosen_chat(main_chat_div, chat_type, chat_pk){
             if (chat_type == "group_chat"){
                 set_chat_links(main_chat_div);
             }
+            set_infinite_scroll_pagination_in_chat();
         }
     });
 }
