@@ -47,7 +47,7 @@
 
 </div>
 
-<div id="chosen_chat_content_wrapper">
+<div id="chosen_chat_content_wrapper" data-has_previous_page="{{ has_previous_page }}" data-first_cursor="{{ first_cursor }}">
     <div id="chat_messages">
         {% for message in messages %}
             {% include 'chat/message.html' with message=message %}
