@@ -100,6 +100,18 @@ class CommentCreateForm(forms.ModelForm):
         }
 
 
+class EditProfileForm(forms.Form):
+    first_name = forms.CharField(label="First name", max_length=30, required=True)
+    last_name = forms.CharField(label="Last name", max_length=30, required=True)
+    date_of_birth = forms.DateField(label="Date of Birth",
+                                required=False,
+                                widget=forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
+                                input_formats=["%Y-%m-%d"])
+    profile_photo = forms.ImageField(label="Profile photo", required=False)
+    cover_photo = forms.ImageField(label="Cover photo", required=False)
+
+
+
 
 
 

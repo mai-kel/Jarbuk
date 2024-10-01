@@ -1,9 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
 from .models import Post, Profile, FriendInvitation, Comment
 from django.db.models import Q
-from .forms import UserForm, RegistrationForm, PostCreateForm, CommentCreateForm
+from .forms import UserForm, RegistrationForm, PostCreateForm, CommentCreateForm, EditProfileForm
 from django.views.decorators.http import require_GET, require_POST
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -428,3 +429,42 @@ def invitations_received_decline(request, id):
         pass
 
     return redirect('site:invitations_received')
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def edit_profile(request):
+    if request.method == "POST":
+        form = EditProfileForm(request.POST, request.FILES)
+        if form.is_valid():
+            cd = form.cleaned_data
+            profile = request.user.profile
+            date_of_birth = cd['date_of_birth']
+            profile_photo = cd['profile_photo']
+            cover_photo = cd['cover_photo']
+            first_name = cd['first_name']
+            last_name = cd['last_name']
+
+            request.user.first_name = first_name
+            request.user.last_name = last_name
+
+            if date_of_birth:
+                profile.date_of_birth = date_of_birth
+            if profile_photo:
+                profile.profile_photo = profile_photo
+            if cover_photo:
+                profile.cover_photo = cover_photo
+
+            profile.save()
+            request.user.save()
+
+            return render(request, 'site/user/edit_profile.html',
+                          {'form': form,})
+    else:
+        form = EditProfileForm()
+        form.fields['first_name'].initial = request.user.first_name
+        form.fields['last_name'].initial = request.user.last_name
+        form.fields['date_of_birth'].initial = request.user.profile.date_of_birth
+
+    return render(request, 'site/user/edit_profile.html',
+                    {'form': form,})

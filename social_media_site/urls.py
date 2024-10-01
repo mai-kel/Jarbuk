@@ -5,6 +5,7 @@ from . import views
 app_name = 'social_media_site'
 
 urlpatterns = [
+    path('', views.posts_feed, name='posts_feed'),
     path('login/', auth_views.LoginView.as_view(redirect_authenticated_user=True), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('register/', views.register, name='register'),
@@ -36,5 +37,5 @@ urlpatterns = [
     path('friends/invitations-received/decline/<int:id>/', views.invitations_received_decline,
          name='invitations_received_decline'),
     path('posts/page/<int:page>/', views.posts_feed, name='posts_feed_page'),
-    path('', views.posts_feed, name='posts_feed'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
 ]

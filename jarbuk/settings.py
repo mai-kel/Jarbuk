@@ -150,6 +150,8 @@ THUMBNAIL_ALIASES = {
         'profile_cp': {'size': (1400, 0), 'crop': False},
         'post_photo': {'size': (0, 600), 'crop': False},
         'friend_pp': {'size': (0, 300), 'crop': False},
+        'edit_profile_pp': {'size': (0, 400), 'crop': False},
+        'edit_profile_cp': {'size': (600, 0), 'crop': False},
         'msg_pp': {'size': (50, 0), 'crop': False},
         'chat_image_info': {'size': (0, 300), 'crop': False},
         'chat_user_pp': {'size': (0, 150), 'crop': False},
