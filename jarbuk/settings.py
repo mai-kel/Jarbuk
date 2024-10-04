@@ -70,6 +70,8 @@ TEMPLATES = [
     },
 ]
 
+
+
 WSGI_APPLICATION = 'jarbuk.wsgi.application'
 
 # Channels
@@ -158,3 +160,8 @@ THUMBNAIL_ALIASES = {
         'chat_image': {'size': (0, 150), 'crop': False},
     },
 }
+
+
+AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend",
+                           "social_media_site.backends.EmailAuthBackend"
+                           ]
