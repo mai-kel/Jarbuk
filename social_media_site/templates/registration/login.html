@@ -18,6 +18,9 @@
 
         <span id="register_link_span"> If you don't have account yet, you can register <span>
         <a href="{% url 'site:register'%}" id="register_link">here.</a>
+        <br>
+        <span id="reset_password_span"> If you forgot your password, you can reset it <span>
+        <a href="{% url 'site:password_reset'%}" id="reset_password_link">here.</a>
     </div>
 
 {% endblock %}

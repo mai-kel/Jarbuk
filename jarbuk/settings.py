@@ -165,3 +165,5 @@ THUMBNAIL_ALIASES = {
 AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend",
                            "social_media_site.backends.EmailAuthBackend"
                            ]
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

@@ -119,13 +119,12 @@ h1 {
     background-color: #0056b3;
   }
 
-  #register_link_span {
+  #register_link_span, #reset_password_span {
     display: block;
-    text-align: center;
     margin-top: 10px;
   }
 
-  #register_link {
+  #register_link, #reset_password_link {
     color: #007bff;
     text-decoration: none;
   }
