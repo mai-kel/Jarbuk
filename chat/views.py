@@ -528,6 +528,7 @@ def get_chat_messages(request, chat_pk, model, before_cursor=None):
     messages = [message for message in page]
     if page.has_previous:
         messages = messages[1:]
+    first_cursor = paginator.cursor(page[0]) if messages else None
     rendered_messages = render_to_string('chat/rendered_messages.html',
                                          {'messages': messages},
                                          request=request)
@@ -535,7 +536,7 @@ def get_chat_messages(request, chat_pk, model, before_cursor=None):
         'status': 'ok',
         'rendered_template': rendered_messages,
         'has_previous_page': page.has_previous,
-        'first_cursor': paginator.cursor(page[0]),
+        'first_cursor': first_cursor,
     }
     return JsonResponse(data, status=200)
 
