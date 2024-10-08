@@ -70,12 +70,13 @@ def render_chat_to_string(chat: GroupChat|PrivateChat, request)->str:
     messages = [message for message in page]
     if page.has_previous:
         messages = messages[1:]
+    first_cursor = paginator.cursor(page[0]) if messages else None
     return render_to_string('chat/chat_detail.html',
                             {'chat': chat,
                              'messages': messages,
                              'user_role': determine_users_group_chat_role(request.user, chat),
                              'has_previous_page': page.has_previous,
-                             'first_cursor': paginator.cursor(page[0])},
+                             'first_cursor': first_cursor},
                             request)
 
 
