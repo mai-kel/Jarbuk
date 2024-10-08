@@ -482,153 +482,163 @@ h1 {
 
 
 
-  /* INVITATIONS SENT */
-  .recipient_container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-  }
+/* INVITATIONS SENT */
+.invitations_list{
+    padding-top: 20px;
+    padding-left: 20px;
+}
 
-  .recipient_profile_photo_wrapper {
-    margin-right: 10px;
-  }
+.recipient_container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
 
-  .user_profile_photo {
-    width: 100px; /* Adjust as needed */
-    height: 100px; /* Adjust as needed */
-    border-radius: 50%;
-  }
+.recipient_profile_photo_wrapper {
+  margin-right: 10px;
+}
 
-  .recipient_name {
-    margin-right: 10px;
-  }
+.user_profile_photo {
+  width: 100px; /* Adjust as needed */
+  height: 100px; /* Adjust as needed */
+  border-radius: 50%;
+}
 
-  .recipient_name a {
-    color: #333;
-    text-decoration: none;
-  }
+.recipient_name {
+  margin-right: 10px;
+}
 
-  .recipient_name a:hover {
-    text-decoration: underline;
-  }
+.recipient_name a {
+  color: #333;
+  text-decoration: none;
+}
 
-  .withdraw_invitation_container p {
-    margin: 0;
-  }
+.recipient_name a:hover {
+  text-decoration: underline;
+}
 
-  .withdraw_invitation_container input[type="submit"] {
-    background-color: #555;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
+.withdraw_invitation_container p {
+  margin: 0;
+}
 
-  .withdraw_invitation_container input[type="submit"]:hover {
-    background-color: #777c81
-  }
+.withdraw_invitation_container input[type="submit"] {
+  background-color: #555;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.withdraw_invitation_container input[type="submit"]:hover {
+  background-color: #777c81
+}
 
 
 /* FRIENDS LIST */
+.friends_list {
+  padding-top: 20px;
+  padding-left: 20px;
+}
+
 .friend_container {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
   }
 
-  .friend_profile_photo_wrapper {
-    margin-right: 10px;
-  }
+.friend_profile_photo_wrapper {
+  margin-right: 10px;
+}
 
-  .friend_profile_photo {
-    width: 100px; /* Adjust as needed */
-    height: 100px; /* Adjust as needed */
-    border-radius: 50%;
-  }
+.friend_profile_photo {
+  width: 100px; /* Adjust as needed */
+  height: 100px; /* Adjust as needed */
+  border-radius: 50%;
+}
 
-  .friend_name {
-    margin-right: 10px;
-  }
+.friend_name {
+  margin-right: 10px;
+}
 
-  .friend_name a {
-    color: #333;
-    text-decoration: none;
-  }
+.friend_name a {
+  color: #333;
+  text-decoration: none;
+}
 
-  .friend_name a:hover {
-    text-decoration: underline;
-  }
+.friend_name a:hover {
+  text-decoration: underline;
+}
 
-  .delete_friend p {
-    margin: 0;
-  }
+.delete_friend p {
+  margin: 0;
+}
 
-  .delete_friend input[type="submit"] {
-    background-color: #555;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
+.delete_friend input[type="submit"] {
+  background-color: #555;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
 
-  .delete_friend input[type="submit"]:hover {
-    background-color: #777c81; /* Adjust as needed */
-  }
+.delete_friend input[type="submit"]:hover {
+  background-color: #777c81; /* Adjust as needed */
+}
 
 
 
-  /* INVITATIONS RECEIVED */
-  .sender_container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-  }
+/* INVITATIONS RECEIVED */
+.sender_container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
 
-  .sender_profile_photo_wrapper {
-    margin-right: 10px;
-  }
+.sender_profile_photo_wrapper {
+  margin-right: 10px;
+}
 
-  .user_profile_photo {
-    width: 100px; /* Adjust as needed */
-    height: 100px; /* Adjust as needed */
-    border-radius: 50%;
-  }
+.user_profile_photo {
+  width: 100px; /* Adjust as needed */
+  height: 100px; /* Adjust as needed */
+  border-radius: 50%;
+}
 
-  .sender_name {
-    margin-right: 10px;
-  }
+.sender_name {
+  margin-right: 10px;
+}
 
-  .sender_name a {
-    color: #333;
-    text-decoration: none;
-  }
+.sender_name a {
+  color: #333;
+  text-decoration: none;
+}
 
-  .sender_name a:hover {
-    text-decoration: underline;
-  }
+.sender_name a:hover {
+  text-decoration: underline;
+}
 
-  .accept_invitation_container p,
-  .decline_invitation_container p {
-    margin: 0;
-  }
+.accept_invitation_container p,
+.decline_invitation_container p {
+  margin: 0;
+}
 
-  .accept_invitation_container input[type="submit"],
-  .decline_invitation_container input[type="submit"] {
-    background-color: #555; /* Adjust as needed */
-    color: #fff;
-    border: none;
-    padding: 10px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-left: 5px;
-  }
+.accept_invitation_container input[type="submit"],
+.decline_invitation_container input[type="submit"] {
+  background-color: #555; /* Adjust as needed */
+  color: #fff;
+  border: none;
+  padding: 10px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 5px;
+}
 
-  .accept_invitation_container input[type="submit"]:hover,
-  .decline_invitation_container input[type="submit"]:hover {
-    background-color: #777c81; /* Adjust as needed */
-  }
+.accept_invitation_container input[type="submit"]:hover,
+.decline_invitation_container input[type="submit"]:hover {
+  background-color: #777c81; /* Adjust as needed */
+}
 
 
 
