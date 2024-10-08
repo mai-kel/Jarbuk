@@ -1,0 +1,11 @@
+{% extends "site/settings/show_settings.html" %}
+{% load static %}
+{% load thumbnail %}
+
+{% block settings_content %}
+    <link href="{% static "css/change_settings.css" %}" rel="stylesheet">
+
+    <div class="change_settings_content_wrapper">
+        <h1> Username changed successfully</h1>
+    </div>
+{% endblock %}

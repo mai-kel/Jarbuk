@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+    <link href="{% static "css/show_settings.css" %}" rel="stylesheet">
+
+    <div id="show_settings_content_wrapper">
+        <div id='settings_list_div'>
+            <ul id='settings_list'>
+                <li><a href="{% url 'site:edit_profile' %}">Edit profile</a></li>
+                <li><a href="{% url 'site:change_username' %}">Change username</a></li>
+                <li><a href="{% url 'site:change_email' %}">Change email</a></li>
+                <li><a href="{% url 'site:change_password' %}">Change password</a></li>
+            </ul>
+        </div>
+
+        <div id='settings_content_div'>
+            {% block settings_content %}{% endblock settings_content %}
+        </div>
+    </div>
+{% endblock %}

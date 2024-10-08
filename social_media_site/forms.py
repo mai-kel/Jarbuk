@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from .models import Post, Comment
 
+
 class UserForm(forms.Form):
     first_name = forms.CharField(label="First name", max_length=30, required=False)
     last_name = forms.CharField(label="Last name", max_length=30, required=False)
@@ -109,6 +110,60 @@ class EditProfileForm(forms.Form):
                                 input_formats=["%Y-%m-%d"])
     profile_photo = forms.ImageField(label="Profile photo", required=False)
     cover_photo = forms.ImageField(label="Cover photo", required=False)
+
+
+class EditUserEmail(forms.Form):
+    current_password = forms.CharField(label="Current password", widget=forms.PasswordInput, required=True)
+    new_email = forms.EmailField(label="New email", max_length=50, required=True)
+
+    def __init__(self, *args, **kwargs):
+        self.logged_user: User = kwargs.pop('logged_user')
+        super().__init__(*args, **kwargs)
+
+
+    def clean_current_password(self):
+        current_password = self.cleaned_data["current_password"]
+        if (self.logged_user.check_password(current_password)):
+            return current_password
+        else:
+            raise forms.ValidationError("Incorrect password")
+
+    def clean_new_email(self):
+        new_email = self.cleaned_data["new_email"]
+        if (User.objects.filter(email=new_email).exists()):
+            raise forms.ValidationError("Email already used")
+        return new_email
+
+
+
+
+class EditUsername(forms.Form):
+    current_password = forms.CharField(label="Current password", widget=forms.PasswordInput, required=True)
+    new_username = forms.CharField(label="New username", max_length=30, required=True)
+
+    def __init__(self, *args, **kwargs):
+        self.logged_user: User = kwargs.pop('logged_user')
+        super().__init__(*args, **kwargs)
+
+
+    def clean_current_password(self):
+        current_password = self.cleaned_data["current_password"]
+        if (self.logged_user.check_password(current_password)):
+            return current_password
+        else:
+            raise forms.ValidationError("Incorrect password")
+
+
+    def clean_new_username(self):
+        new_username = self.cleaned_data["new_username"]
+        if (User.objects.filter(username=new_username).exists()):
+            raise forms.ValidationError("Username already used")
+        return new_username
+
+
+
+
+
 
 
 

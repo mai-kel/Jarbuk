@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from .models import Post, Profile, FriendInvitation, Comment
 from django.db.models import Q
-from .forms import UserForm, RegistrationForm, PostCreateForm, CommentCreateForm, EditProfileForm
+from .forms import UserForm, RegistrationForm, PostCreateForm, CommentCreateForm,\
+            EditProfileForm, EditUserEmail, EditUsername
 from django.views.decorators.http import require_GET, require_POST
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -458,7 +459,7 @@ def edit_profile(request):
             profile.save()
             request.user.save()
 
-            return render(request, 'site/user/edit_profile.html',
+            return render(request, 'site/settings/edit_profile.html',
                           {'form': form,})
     else:
         form = EditProfileForm()
@@ -466,5 +467,60 @@ def edit_profile(request):
         form.fields['last_name'].initial = request.user.last_name
         form.fields['date_of_birth'].initial = request.user.profile.date_of_birth
 
-    return render(request, 'site/user/edit_profile.html',
+    return render(request, 'site/settings/edit_profile.html',
                     {'form': form,})
+
+
+@login_required
+@require_GET
+def show_settings(request):
+    return render(request, "site/settings/show_settings.html")
+
+
+@login_required
+@require_http_methods(['GET', 'POST'])
+def change_username(request):
+    if request.method == "POST":
+        form = EditUsername(request.POST, logged_user=request.user)
+        if form.is_valid():
+            cd = form.cleaned_data
+            new_username = cd['new_username']
+            request.user.username = new_username
+            request.user.save()
+
+            return redirect('site:change_username_done')
+    else:
+        form = EditUsername(logged_user=request.user)
+    return render(request, 'site/settings/change_username.html',
+                  {'form': form})
+
+
+@login_required
+@require_GET
+def change_username_done(request):
+    return render(request, 'site/settings/change_username_done.html')
+
+
+@login_required
+@require_http_methods(['GET', 'POST'])
+def change_email(request):
+    if request.method == "POST":
+        form = EditUserEmail(request.POST, logged_user=request.user)
+        if form.is_valid():
+            cd = form.cleaned_data
+            new_email = cd['new_email']
+            request.user.email = new_email
+            request.user.save()
+
+            return redirect('site:change_email_done')
+    else:
+        form = EditUserEmail(logged_user=request.user)
+    return render(request, 'site/settings/change_email.html',
+                  {'form': form})
+
+
+@login_required
+@require_GET
+def change_email_done(request):
+    return render(request, 'site/settings/change_email_done.html')
+
