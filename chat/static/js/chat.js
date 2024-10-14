@@ -420,11 +420,13 @@ function set_chat_links(main_chat_div){
         main_chat_div.querySelector("#chat_info_button").addEventListener('click', function(){
             console.log("chat info button clicked");
             const url_chat_info = "/chat/group-chat-info/" + chat_pk + "/";
-            fetch(url_chat_info, options).then(response => response.text()).then(data => {
-                main_chat_div.querySelector("#chosen_chat_content_wrapper").innerHTML = data;
-                main_chat_div.querySelector("#return_to_messages_button").addEventListener('click', function(){
-                    set_chosen_chat(main_chat_div, "group_chat", chat_pk);
-                });
+            fetch(url_chat_info, options).then(response => response.json()).then(data => {
+                if (data["status"] === "ok"){
+                    main_chat_div.querySelector("#chosen_chat_content_wrapper").innerHTML = data['rendered_template'];
+                    main_chat_div.querySelector("#return_to_messages_button").addEventListener('click', function(){
+                        set_chosen_chat(main_chat_div, "group_chat", chat_pk);
+                    });
+                }
             });
         });
     }

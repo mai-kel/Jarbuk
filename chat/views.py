@@ -172,39 +172,25 @@ def create_group_chat(request):
 @require_http_methods(['GET'])
 @login_required
 def get_group_chat_info(request, chat_pk):
-    data = {}
+    response_data = {}
     chat = get_object_or_404(GroupChat, pk=chat_pk)
     if not request.user in chat.participants.all():
-        data['status'] = 'error'
-        data['message'] = 'You are not a participant of this chat'
-        return JsonResponse(data, status=403)
-    data['chat'] = chat
+        response_data['status'] = 'error'
+        response_data['message'] = 'You are not a participant of this chat'
+        return JsonResponse(response_data, status=403)
+    template_data = {}
+    template_data['chat'] = chat
     owner = chat.owner
     admins = chat.admins.all()
     rest_participants = chat.participants.all().exclude(pk=owner.pk).difference(admins)
-    data['owner'] = owner
-    data['admins'] = admins
-    data['rest_participants'] = rest_participants
-    return render(request, 'chat/group_chat_info.html', data)
-
-
-@require_http_methods(['GET'])
-@login_required
-def edit_group_chat(request, chat_pk):
-    data = {}
-    chat = get_object_or_404(GroupChat, pk=chat_pk)
-    if request.user == chat.owner:
-        role = 'owner'
-    elif request.user in chat.admins.all():
-        role = 'admin'
-    else:
-        data['status'] = 'error'
-        data['message'] = 'You have no permission to edit this chat'
-        return JsonResponse(data, status=403)
-
-    return render(request, 'chat/edit_group_chat.html',
-                  {'role': role,
-                   'chat': chat})
+    template_data['owner'] = owner
+    template_data['admins'] = admins
+    template_data['rest_participants'] = rest_participants
+    rendered_template = render_to_string('chat/group_chat_info.html', template_data,
+                                         request=request)
+    response_data['status'] = 'ok'
+    response_data['rendered_template'] = rendered_template
+    return JsonResponse(response_data, status=200)
 
 
 def delete_user_from_group_chat_as_owner(chat: GroupChat, user_to_delete: User)->tuple[dict, int]:
