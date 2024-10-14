@@ -732,7 +732,7 @@ class TestPostDetail(TestCase):
         url = reverse('site:post_detail', args=[self.post3.pk])
         response = self.client.get(url)
         self.assertTemplateUsed(response, 'site/post/post_no_auth.html')
-        self.assertInHTML('Author of this post is not on your friends list. You need to be friends with the author to see the post.',
+        self.assertInHTML('Author of this post is not on your friends list. You need to be friends with the author to see this post.',
                           response.content.decode())
 
 
