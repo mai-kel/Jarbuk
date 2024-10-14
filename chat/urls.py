@@ -11,7 +11,6 @@ urlpatterns=[
     path('private-message/<int:message_pk>/', views.get_rendered_private_message, name='get_private_message'),
     path('group-message/<int:message_pk>/', views.get_rendered_group_message, name='get_group_message'),
     path('group-chat-create/', views.create_group_chat, name='create_group_chat'),
-    path('edit-group-chat/<int:chat_pk>/', views.edit_group_chat, name='edit_group_chat'),
     path('group-chat-info/<int:chat_pk>/', views.get_group_chat_info, name='get_group_chat_info'),
     path('group-chat-add-users/<int:chat_pk>/', views.get_add_users_page, name='get_add_users_page'),
     path('group-chat-add-user/', views.add_user_to_group_chat, name='add_user_to_group_chat'),
