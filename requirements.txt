@@ -5,3 +5,4 @@ channels==4.1.0
 daphne==4.1.2
 channels-redis==4.2.0
 django-cursor-pagination==0.3.0
+factory-boy==3.3.1
