@@ -27,3 +27,13 @@ class GroupChatForm(forms.ModelForm):
         self.fields['participants'].queryset = User.objects.filter(
             profile__in=self.logged_user.profile.friends.all())
 
+    def clean_participants(self):
+        participants = self.cleaned_data['participants']
+        friends = self.logged_user.profile.friends.all()
+        is_subset = not participants.exclude(pk__in=friends).exists()
+        if not is_subset:
+            raise forms.ValidationError('You can only add friends to the group chat')
+        else:
+            return participants
+
+
