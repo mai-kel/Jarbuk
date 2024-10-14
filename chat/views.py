@@ -64,7 +64,7 @@ def render_chat_to_string(chat: GroupChat|PrivateChat, request)->str:
         qs = chat.group_messages.all()
     else:
         qs = chat.private_messages.all()
-    page_size = 10
+    page_size = 10+1
     paginator = CursorPaginator(qs, ordering=('creation_date', 'id'))
     page = paginator.page(last=page_size, before=None)
     messages = [message for message in page]
@@ -82,7 +82,10 @@ def render_chat_to_string(chat: GroupChat|PrivateChat, request)->str:
 
 def get_rendered_chat(request, chat_pk, model: GroupChat|PrivateChat):
     data = {}
-    chat = model.objects.get(pk=chat_pk)
+    try:
+        chat = model.objects.get(pk=chat_pk)
+    except:
+        chat = None
     if chat is None:
         data['status'] = 'error'
         data['message'] = 'Chat not found'
@@ -112,7 +115,10 @@ def get_rendered_group_message(request, message_pk):
 
 def get_rendered_message(request, message_pk, model: GroupMessage|PrivateMessage):
     data = {}
-    message = model.objects.get(pk=message_pk)
+    try:
+        message = model.objects.get(pk=message_pk)
+    except:
+        message = None
     if message is None:
         data['status'] = 'error'
         data['message'] = 'Message not found'
