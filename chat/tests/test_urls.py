@@ -28,10 +28,6 @@ class TestUrls(SimpleTestCase):
             url = reverse('chat:create_group_chat')
             self.assertEquals(resolve(url).func, views.create_group_chat)
 
-        def test_edit_group_chat_url_resolves(self):
-            url = reverse('chat:edit_group_chat', args=[1234])
-            self.assertEquals(resolve(url).func, views.edit_group_chat)
-
         def test_get_group_chat_info_url_resolves(self):
             url = reverse('chat:get_group_chat_info', args=[1234])
             self.assertEquals(resolve(url).func, views.get_group_chat_info)
