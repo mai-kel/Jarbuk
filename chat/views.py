@@ -415,7 +415,7 @@ def remove_from_admins(request):
         if user_to_delete in chat.admins.all():
             chat.admins.remove(user_to_delete)
             data['status'] = 'ok'
-            data['message'] = 'User deleted from the admins'
+            data['message'] = 'User removed from admins'
             status_code=200
         else:
             data['status'] = 'error'
