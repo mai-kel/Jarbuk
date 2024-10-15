@@ -93,9 +93,11 @@
             </div>
         </div>
 
-        <div id="remove_group_div">
-            <button id="remove_group_button" type="button"> Remove group </button>
-        </div>
+        {% if role == "owner" %}
+            <div id="remove_group_div">
+                <button id="remove_group_button" type="button"> Remove group </button>
+            </div>
+        {% endif %}
     </div>
 </div
 
