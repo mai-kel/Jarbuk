@@ -271,6 +271,10 @@ def add_user_to_group_chat(request):
             data['status'] = 'error'
             data['message'] = 'User is already a participant of this chat'
             status_code=403
+        elif user_to_add.profile not in request.user.profile.friends.all():
+            data['status'] = 'error'
+            data['message'] = 'You can only add friends to the chat'
+            status_code=403
         else:
             chat.participants.add(user_to_add)
             data['status'] = 'ok'
