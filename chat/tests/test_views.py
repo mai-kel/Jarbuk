@@ -10,7 +10,6 @@ from social_media_site.factories import UserFactory, ProfileFactory
 from django.contrib import auth
 from django.template import defaultfilters
 
-
 class TestListChats(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -224,3 +223,732 @@ class TestGetGroupMessage(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response_json['status'], 'ok')
         self.assertIn(message_br, response_json['rendered_message'])
+
+
+class TestCreateGroupChat(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.user1 = UserFactory()
+        cls.user2 = UserFactory()
+        cls.user3 = UserFactory()
+        cls.user1.profile.friends.add(cls.user2.profile)
+
+    def test_create_group_chat_empty_body(self):
+        self.client.force_login(self.user1)
+        url = reverse('chat:create_group_chat')
+        response = self.client.post(url)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response_json['status'], 'error')
+
+    def test_create_group_chat_participants_is_not_friend(self):
+        self.client.force_login(self.user1)
+        url = reverse('chat:create_group_chat')
+        post_body = {
+            'name': 'test',
+            'participants': [self.user3.pk]
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response_json['status'], 'error')
+
+    def test_create_group_chat_success(self):
+        self.client.force_login(self.user1)
+        url = reverse('chat:create_group_chat')
+        post_body = {
+            'name': 'test',
+            'participants': [self.user2.pk],
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json['status'], 'ok')
+        self.assertEqual(GroupChat.objects.count(), 1)
+        group_chat = GroupChat.objects.first()
+        self.assertEqual(group_chat.name, 'test')
+        self.assertEqual(group_chat.owner, self.user1)
+        self.assertTrue(self.user1 in group_chat.participants.all())
+        self.assertTrue(self.user2 in group_chat.participants.all())
+
+
+class TestGetGroupChatInfo(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.users = UserFactory.create_batch(4)
+        cls.group_chat = GroupChatFactory(owner=cls.users[0],
+                                          participants=[cls.users[0], cls.users[1], cls.users[2]],
+                                          admins=[cls.users[1]])
+
+    def test_user_try_get_info_of_non_existing_chat(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:get_group_chat_info', args=[100])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_user_try_get_info_of_chat_he_is_not_participant_of(self):
+        self.client.force_login(self.users[3])
+        url = reverse('chat:get_group_chat_info', args=[self.group_chat.pk])
+        response = self.client.get(url)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You are not a participant of this chat')
+
+    def test_user_gets_info(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:get_group_chat_info', args=[self.group_chat.pk])
+        response = self.client.get(url)
+        response_json = response.json()
+        rendered_template = response_json['rendered_template']
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json['status'], 'ok')
+        self.assertTemplateUsed(response, 'chat/group_chat_info.html')
+        self.assertIn(self.group_chat.name, rendered_template)
+        for participant in self.users[:-1]:
+            self.assertIn(participant.first_name+' '+participant.last_name, rendered_template)
+        self.assertNotIn(self.users[-1].first_name+' '+self.users[-1].last_name, rendered_template)
+
+
+class TestGetAddUsersPage(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.users = UserFactory.create_batch(5)
+        cls.group_chat = GroupChatFactory(owner=cls.users[0],
+                                          participants=[cls.users[0], cls.users[1], cls.users[2]],
+                                          admins=[cls.users[1]])
+        cls.users[0].profile.friends.add(cls.users[3].profile)
+        cls.users[0].profile.friends.add(cls.users[2].profile)
+
+    def test_non_existing_chat(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:get_add_users_page', args=[100])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_not_participant(self):
+        self.client.force_login(self.users[4])
+        url = reverse('chat:get_add_users_page', args=[self.group_chat.pk])
+        response = self.client.get(url)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to add users to this chat')
+
+    def test_template(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:get_add_users_page', args=[self.group_chat.pk])
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, 'chat/add_users_to_chat.html')
+
+    def test_only_friends_ot_of_group_are_shown(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:get_add_users_page', args=[self.group_chat.pk])
+        response = self.client.get(url)
+        response_json = response.json()
+        rendered_template = response_json['rendered_template']
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json['status'], 'ok')
+        self.assertIn(self.users[3].first_name+' '+self.users[3].last_name, rendered_template)
+        self.assertNotIn(self.users[4].first_name+' '+self.users[4].last_name, rendered_template)
+        self.assertNotIn(self.users[2].first_name+' '+self.users[2].last_name, rendered_template)
+
+
+class TestAddUserToGroupChat(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.users = UserFactory.create_batch(5)
+        cls.group_chat = GroupChatFactory(owner=cls.users[0],
+                                          participants=[cls.users[0], cls.users[1], cls.users[2]],
+                                          admins=[cls.users[1]])
+        cls.users[0].profile.friends.add(cls.users[3].profile)
+        cls.users[0].profile.friends.add(cls.users[2].profile)
+
+    def test_non_existing_chat(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:add_user_to_group_chat')
+        post_body = {
+            'chat_pk': 100,
+            'user_pk': self.users[3].pk
+        }
+        response = self.client.post(url, post_body)
+        self.assertEqual(response.status_code, 404)
+
+    def test_non_existing_user(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:add_user_to_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': 100
+        }
+        response = self.client.post(url, post_body)
+        self.assertEqual(response.status_code, 404)
+
+    def test_not_participant(self):
+        self.client.force_login(self.users[4])
+        url = reverse('chat:add_user_to_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[3].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to add users to this chat')
+
+    def test_not_admin(self):
+        self.client.force_login(self.users[2])
+        url = reverse('chat:add_user_to_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[3].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to add users to this chat')
+
+    def test_user_not_friend(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:add_user_to_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[4].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You can only add friends to the chat')
+
+    def test_user_already_participant(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:add_user_to_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[2].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'User is already a participant of this chat')
+
+    def test_success(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:add_user_to_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[3].pk
+        }
+        self.assertFalse(self.users[3] in self.group_chat.participants.all())
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json['status'], 'ok')
+        self.assertEqual(response_json['message'], 'User added to the chat')
+        self.assertTrue(self.users[3] in self.group_chat.participants.all())
+
+
+class TestGetManageGroupPage(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.users = UserFactory.create_batch(5)
+        cls.group_chat = GroupChatFactory(owner=cls.users[0],
+                                          participants=[cls.users[0], cls.users[1], cls.users[2], cls.users[4]],
+                                          admins=[cls.users[1], cls.users[4]])
+
+    def test_non_existing_chat(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:manage_group_chat', args=[100])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_not_participant(self):
+        self.client.force_login(self.users[3])
+        url = reverse('chat:manage_group_chat', args=[self.group_chat.pk])
+        response = self.client.get(url)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to manage this chat')
+
+    def test_participant_not_admin(self):
+        self.client.force_login(self.users[2])
+        url = reverse('chat:manage_group_chat', args=[self.group_chat.pk])
+        response = self.client.get(url)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to manage this chat')
+
+    def test_template(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:manage_group_chat', args=[self.group_chat.pk])
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, 'chat/manage_group_chat.html')
+
+    def test_admin_success(self):
+        self.client.force_login(self.users[1])
+        url = reverse('chat:manage_group_chat', args=[self.group_chat.pk])
+        response = self.client.get(url)
+        response_json = response.json()
+        rendered_template = response_json['rendered_template']
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json['status'], 'ok')
+        self.assertNotIn("Remove group", rendered_template)
+        self.assertNotIn("Remove from admins", rendered_template)
+        self.assertNotIn("Add to admins", rendered_template)
+        self.assertNotIn("Transfer ownership", rendered_template)
+        self.assertIn("Remove from group", rendered_template)
+
+    def test_owner_success(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:manage_group_chat', args=[self.group_chat.pk])
+        response = self.client.get(url)
+        response_json = response.json()
+        rendered_template = response_json['rendered_template']
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json['status'], 'ok')
+        self.assertIn("Remove group", rendered_template)
+        self.assertIn("Remove from admins", rendered_template)
+        self.assertIn("Add to admins", rendered_template)
+        self.assertIn("Transfer ownership", rendered_template)
+        self.assertIn("Remove from group", rendered_template)
+
+
+class TestRemoveUserFromGroupChat(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.users = UserFactory.create_batch(5)
+
+    def setUp(self):
+        self.group_chat = GroupChatFactory(owner=self.users[0],
+                                           participants=[self.users[0], self.users[1], self.users[2], self.users[3]],
+                                           admins=[self.users[1], self.users[3]])
+
+    def test_non_existing_chat(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:remove_user_from_group_chat')
+        post_body = {
+            'chat_pk': 100,
+            'user_pk': self.users[3].pk
+        }
+        response = self.client.post(url, post_body)
+        self.assertEqual(response.status_code, 404)
+
+    def test_non_existing_user(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:remove_user_from_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': 100
+        }
+        response = self.client.post(url, post_body)
+        self.assertEqual(response.status_code, 404)
+
+    def test_remove_someone_who_is_not_participant(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:remove_user_from_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[4].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'User is not a participant of this chat')
+
+    def test_remove_as_not_participant(self):
+        self.client.force_login(self.users[4])
+        url = reverse('chat:remove_user_from_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[3].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to delete users from this chat')
+
+    def test_remove_as_participant(self):
+        self.client.force_login(self.users[2])
+        url = reverse('chat:remove_user_from_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[3].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to delete users from this chat')
+
+    def test_remove_admin_as_admin(self):
+        self.client.force_login(self.users[3])
+        url = reverse('chat:remove_user_from_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[1].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to delete another admin from the chat')
+
+    def test_remove_owner_as_admin(self):
+        self.client.force_login(self.users[3])
+        url = reverse('chat:remove_user_from_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[0].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to delete the owner from the chat')
+
+    def test_remove_participant_as_admin(self):
+        self.client.force_login(self.users[3])
+        url = reverse('chat:remove_user_from_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[2].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json['status'], 'ok')
+        self.assertEqual(response_json['message'], 'User deleted from the chat')
+        self.assertFalse(self.users[2] in self.group_chat.participants.all())
+
+    def test_remove_admin_as_owner(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:remove_user_from_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[3].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json['status'], 'ok')
+        self.assertEqual(response_json['message'], 'User deleted from the chat')
+        self.assertFalse(self.users[3] in self.group_chat.participants.all())
+        self.assertFalse(self.users[3] in self.group_chat.admins.all())
+
+    def test_remove_owner_as_owner(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:remove_user_from_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[0].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        err_msg = "You have to transfer the ownership to another user before deleting yourself from the chat"
+        self.assertEqual(response_json['message'], err_msg)
+
+    def test_remove_participant_as_owner(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:remove_user_from_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[2].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json['status'], 'ok')
+        self.assertEqual(response_json['message'], 'User deleted from the chat')
+        self.assertFalse(self.users[2] in self.group_chat.participants.all())
+
+
+class TestRemoveFromAdmins(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.users = UserFactory.create_batch(5)
+
+    def setUp(self):
+        self.group_chat = GroupChatFactory(owner=self.users[0],
+                                           participants=[self.users[0], self.users[1], self.users[2], self.users[3]],
+                                           admins=[self.users[1], self.users[2]])
+
+    def test_non_existing_chat(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:remove_from_admins')
+        post_body = {
+            'chat_pk': 100,
+            'user_pk': self.users[2].pk
+        }
+        response = self.client.post(url, post_body)
+        self.assertEqual(response.status_code, 404)
+
+    def test_non_existing_user(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:remove_from_admins')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': 100
+        }
+        response = self.client.post(url, post_body)
+        self.assertEqual(response.status_code, 404)
+
+    def test_remove_as_not_participant(self):
+        self.client.force_login(self.users[4])
+        url = reverse('chat:remove_from_admins')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[2].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to delete admins from this chat')
+
+    def test_remove_not_participant(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:remove_from_admins')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[4].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'User is not an admin of this chat')
+
+    def test_remove_not_admin(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:remove_from_admins')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[3].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'User is not an admin of this chat')
+        self.assertTrue(self.users[3] in self.group_chat.participants.all())
+
+    def test_remove_as_admin(self):
+        self.client.force_login(self.users[2])
+        url = reverse('chat:remove_from_admins')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[1].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to delete admins from this chat')
+
+    def test_remove_as_owner(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:remove_from_admins')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[1].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json['status'], 'ok')
+        self.assertEqual(response_json['message'], 'User removed from admins')
+        self.assertFalse(self.users[1] in self.group_chat.admins.all())
+
+
+class TestAddAdminToGroupChat(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.users = UserFactory.create_batch(5)
+
+    def setUp(self):
+        self.group_chat = GroupChatFactory(owner=self.users[0],
+                                           participants=[self.users[0], self.users[1], self.users[2], self.users[3]],
+                                           admins=[self.users[1], self.users[2]])
+
+    def test_non_existing_chat(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:add_admin_to_group_chat')
+        post_body = {
+            'chat_pk': 100,
+            'user_pk': self.users[3].pk
+        }
+        response = self.client.post(url, post_body)
+        self.assertEqual(response.status_code, 404)
+
+    def test_non_existing_user(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:add_admin_to_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': 100
+        }
+        response = self.client.post(url, post_body)
+        self.assertEqual(response.status_code, 404)
+
+    def test_add_as_not_participant(self):
+        self.client.force_login(self.users[4])
+        url = reverse('chat:add_admin_to_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[3].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to add admins to this chat')
+
+    def test_add_not_participant(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:add_admin_to_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[4].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'User is not a participant of this chat')
+
+    def test_add_as_admin(self):
+        self.client.force_login(self.users[2])
+        url = reverse('chat:add_admin_to_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[3].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to add admins to this chat')
+
+    def test_add_already_admin(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:add_admin_to_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[1].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'User is already an admin of this chat')
+
+    def test_add_success(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:add_admin_to_group_chat')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'user_pk': self.users[3].pk
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json['status'], 'ok')
+        self.assertEqual(response_json['message'], 'User added to the admins')
+        self.assertTrue(self.users[3] in self.group_chat.admins.all())
+
+
+class ChangeChatName(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.users = UserFactory.create_batch(5)
+
+    def setUp(self):
+        self.group_chat = GroupChatFactory(owner=self.users[0],
+                                           participants=[self.users[0], self.users[1], self.users[2], self.users[3]],
+                                           admins=[self.users[1], self.users[2]])
+
+    def test_non_existing_chat(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:change_chat_name')
+        post_body = {
+            'chat_pk': 100,
+            'new_name': 'test'
+        }
+        response = self.client.post(url, post_body)
+        self.assertEqual(response.status_code, 404)
+
+    def test_not_participant(self):
+        self.client.force_login(self.users[4])
+        url = reverse('chat:change_chat_name')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'new_name': 'test'
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to change the name of this chat')
+
+    def test_not_admin(self):
+        self.client.force_login(self.users[3])
+        url = reverse('chat:change_chat_name')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'new_name': 'test'
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response_json['status'], 'error')
+        self.assertEqual(response_json['message'], 'You have no permission to change the name of this chat')
+
+    def test_as_admin(self):
+        self.client.force_login(self.users[1])
+        url = reverse('chat:change_chat_name')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'new_name': 'test'
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.group_chat.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json['status'], 'ok')
+        self.assertEqual(response_json['message'], 'Name changed successfully')
+        self.assertEqual(self.group_chat.name, 'test')
+
+    def test_as_owner(self):
+        self.client.force_login(self.users[0])
+        url = reverse('chat:change_chat_name')
+        post_body = {
+            'chat_pk': self.group_chat.pk,
+            'new_name': 'test'
+        }
+        response = self.client.post(url, post_body)
+        response_json = response.json()
+        self.group_chat.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json['status'], 'ok')
+        self.assertEqual(response_json['message'], 'Name changed successfully')
+        self.assertEqual(self.group_chat.name, 'test')
+
