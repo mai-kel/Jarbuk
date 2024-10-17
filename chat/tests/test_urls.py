@@ -81,7 +81,7 @@ class TestUrls(SimpleTestCase):
             self.assertEquals(resolve(url).func, views.get_paginated_group_chat_messages)
 
         def test_get_group_chat_messages_cursor_given_url_resolves(self):
-            url = reverse('chat:get_group_chat_messages_cursor_given', args=[1234, 'cursor'])
+            url = reverse('chat:get_group_chat_messages_before_id_given', args=[1234, 'cursor'])
             self.assertEquals(resolve(url).func, views.get_paginated_group_chat_messages)
 
         def test_get_private_chat_messages_url_resolves(self):
@@ -89,5 +89,5 @@ class TestUrls(SimpleTestCase):
             self.assertEquals(resolve(url).func, views.get_paginated_private_chat_messages)
 
         def test_get_private_chat_messages_cursor_given_url_resolves(self):
-            url = reverse('chat:get_private_chat_messages_cursor_given', args=[1234, 'cursor'])
+            url = reverse('chat:get_private_chat_messages_before_id_given', args=[1234, 'cursor'])
             self.assertEquals(resolve(url).func, views.get_paginated_private_chat_messages)
