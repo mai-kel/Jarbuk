@@ -516,16 +516,20 @@ def get_chat_messages(request, chat_pk, model, before_id=None):
     if request.user not in chat.participants.all():
         return JsonResponse({'status': 'error', 'message': 'You are not a participant of this chat'}, status=403)
 
+    if model == GroupChat:
+        messages_field = chat.group_messages
+    else:
+        messages_field = chat.private_messages
 
     if before_id is not None:
         try:
-            messages = chat.group_messages.filter(id__lt=before_id).order_by('-id')
+            messages = messages_field.filter(id__lt=before_id).order_by('-id')
             has_previous_page = True if len(messages) > 10 else False
             messages = messages[:10][::-1]
         except:
             return JsonResponse({'status': 'error', 'message': 'Invalid cursor'}, status=400)
     else:
-        messages = chat.group_messages.all().order_by('-id')
+        messages = messages_field.all().order_by('-id')
         has_previous_page = True if len(messages) > 10 else False
         messages = messages[:10][::-1]
 
