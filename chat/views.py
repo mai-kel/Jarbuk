@@ -10,7 +10,6 @@ from django.http import JsonResponse
 from .forms import GroupChatForm
 from django.contrib import messages
 from easy_thumbnails.files import get_thumbnailer
-from cursor_pagination import CursorPaginator
 
 
 @require_http_methods(['GET'])
@@ -61,23 +60,23 @@ def determine_users_group_chat_role(user: User, chat: GroupChat|PrivateChat)->st
 
 def render_chat_to_string(chat: GroupChat|PrivateChat, request)->str:
     if isinstance(chat, GroupChat):
-        qs = chat.group_messages.all()
+        messages = chat.group_messages.all().order_by('-id')
+        has_previous_page = True if len(messages) > 10 else False
+        messages = messages[:10][::-1]
     else:
-        qs = chat.private_messages.all()
-    page_size = 10+1
-    paginator = CursorPaginator(qs, ordering=('creation_date', 'id'))
-    page = paginator.page(last=page_size, before=None)
-    messages = [message for message in page]
-    if page.has_previous:
-        messages = messages[1:]
-    first_cursor = paginator.cursor(page[0]) if messages else None
+        messages = chat.private_messages.all().order_by('-id')
+        has_previous_page = True if len(messages) > 10 else False
+        messages = messages[:10][::-1]
+
+    first_id = messages[0].id if messages else None
+
     return render_to_string('chat/chat_detail.html',
                             {'chat': chat,
                              'messages': messages,
                              'user_role': determine_users_group_chat_role(request.user, chat),
-                             'has_previous_page': page.has_previous,
-                             'first_cursor': first_cursor},
-                            request)
+                             'has_previous_page': has_previous_page,
+                             'first_id': first_id},
+                             request=request)
 
 
 def get_rendered_chat(request, chat_pk, model: GroupChat|PrivateChat):
@@ -304,7 +303,7 @@ def transfer_ownership(request):
             status_code=403
         elif user_to_transfer == chat.owner:
             data['status'] = 'error'
-            data['message'] = 'You is already the owner of this chat'
+            data['message'] = 'You are already the owner of this chat'
             status_code=403
         else:
             chat.owner = user_to_transfer
@@ -512,38 +511,46 @@ def change_chat_name(request):
         return JsonResponse(data, status=403)
 
 
-def get_chat_messages(request, chat_pk, model, before_cursor=None):
-    chat = get_object_or_404(model, pk=chat_pk)
+def get_chat_messages(request, chat_pk, model, before_id=None):
+    chat: GroupChat = get_object_or_404(model, pk=chat_pk)
     if request.user not in chat.participants.all():
         return JsonResponse({'status': 'error', 'message': 'You are not a participant of this chat'}, status=403)
 
-    qs = chat.group_messages.all() if isinstance(chat, GroupChat) else chat.private_messages.all()
-    page_size = 10+1
-    paginator = CursorPaginator(qs, ordering=('creation_date', 'id'))
-    page = paginator.page(last=page_size, before=before_cursor)
-    messages = [message for message in page]
-    if page.has_previous:
-        messages = messages[1:]
-    first_cursor = paginator.cursor(page[0]) if messages else None
+
+    if before_id is not None:
+        try:
+            messages = chat.group_messages.filter(id__lt=before_id).order_by('-id')
+            has_previous_page = True if len(messages) > 10 else False
+            messages = messages[:10][::-1]
+        except:
+            return JsonResponse({'status': 'error', 'message': 'Invalid cursor'}, status=400)
+    else:
+        messages = chat.group_messages.all().order_by('-id')
+        has_previous_page = True if len(messages) > 10 else False
+        messages = messages[:10][::-1]
+
+    first_id = messages[0].id if messages else None
     rendered_messages = render_to_string('chat/rendered_messages.html',
                                          {'messages': messages},
                                          request=request)
     data = {
         'status': 'ok',
-        'rendered_template': rendered_messages,
-        'has_previous_page': page.has_previous,
-        'first_cursor': first_cursor,
+        'msgs': [msg.text for msg in messages],
+        'has_previous_page': has_previous_page,
+        'first_id': first_id,
+        'rendered_template': rendered_messages
     }
+
     return JsonResponse(data, status=200)
 
 
 @require_http_methods(['GET'])
 @login_required
-def get_paginated_private_chat_messages(request, chat_pk, before_cursor=None):
-    return get_chat_messages(request, chat_pk, PrivateChat, before_cursor)
+def get_paginated_private_chat_messages(request, chat_pk, before_id=None):
+    return get_chat_messages(request, chat_pk, PrivateChat, before_id)
 
 
 @require_http_methods(['GET'])
 @login_required
-def get_paginated_group_chat_messages(request, chat_pk, before_cursor=None):
-    return get_chat_messages(request, chat_pk, GroupChat, before_cursor)
+def get_paginated_group_chat_messages(request, chat_pk, before_id=None):
+    return get_chat_messages(request, chat_pk, GroupChat, before_id)

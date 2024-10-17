@@ -20,8 +20,9 @@ function message_received(data){
     let main_chat_type = main_chat_div.getAttribute("data-chat_type");
     let main_chat_pk = main_chat_div.getAttribute("data-chat_pk");
     const messages_div = document.getElementById("chat_messages");
-
+    console.log("rec1")
     if (main_chat_type == data.chat_type && main_chat_pk == data.chat_pk && messages_div != null){
+        console.log("rec2")
         const url =  (data.message_type == "group_message") ? "/chat/group-message/" + data.message_pk + "/" : "/chat/private-message/" + data.message_pk + "/";
         var options = {
             method: 'GET',
@@ -74,7 +75,7 @@ function connect() {
         console.log(data);
 
         switch (data.type) {
-            default:
+            case "chat.message":
                 message_received(data);
                 break;
         }
@@ -505,6 +506,7 @@ function change_view_to_manage_chat(main_chat_div){
 
 
 function chat_form_submit(event){
+    console.log('??????')
     event.preventDefault();
     const message_input = document.getElementById("message_input");
     const message = message_input.value;
@@ -516,6 +518,9 @@ function chat_form_submit(event){
         "chat_pk": chat_pk,
         "chat_type": chat_type
     }
+
+    console.log(data);
+    console.log(chatSocket);
 
     chatSocket.send(JSON.stringify(data));
     message_input.value = "";
@@ -529,11 +534,11 @@ function set_infinite_scroll_pagination_in_chat(){
             let chosen_chat_content_wrapper = document.getElementById("chosen_chat_content_wrapper");
             let is_more_messages = (chosen_chat_content_wrapper.getAttribute("data-has_previous_page").toLowerCase() === "true");
             if (is_more_messages){
-                let first_cursor = chosen_chat_content_wrapper.getAttribute("data-first_cursor");
+                let first_id = chosen_chat_content_wrapper.getAttribute("data-first_id");
                 let chat_pk = document.getElementById("main_chat").getAttribute("data-chat_pk");
                 let chat_type = document.getElementById("main_chat").getAttribute("data-chat_type");
                 let url = (chat_type == "group_chat") ? "/chat/group-chat/paginated-messages/" : "/chat/private-chat/paginated-messages/";
-                url += chat_pk + "/" + first_cursor + "/";
+                url += chat_pk + "/" + first_id + "/";
                 let options = {
                     method: 'GET',
                     mode: 'same-origin'
@@ -543,7 +548,7 @@ function set_infinite_scroll_pagination_in_chat(){
                         let old_scroll_height = chat_messages_div.scrollHeight;
                         chat_messages_div.insertAdjacentHTML("afterbegin", data["rendered_template"]);
                         chat_messages_div.scrollTop = chat_messages_div.scrollHeight - old_scroll_height;
-                        chosen_chat_content_wrapper.setAttribute("data-first_cursor", data["first_cursor"]);
+                        chosen_chat_content_wrapper.setAttribute("data-first_id", data["first_id"]);
                         chosen_chat_content_wrapper.setAttribute("data-has_previous_page", data["has_previous_page"]);
                     }
                 });
@@ -627,6 +632,7 @@ function set_create_chat_form(){
                 new_chat_element.addEventListener('click', function(){
                     set_chosen_chat(document.getElementById("main_chat"), "group_chat", data['chat_pk']);
                 });
+                window.location.reload(); // TEMPORARY SOLUTION
                 set_chosen_chat(document.getElementById("main_chat"), "group_chat", data['chat_pk']);
             }
         });
