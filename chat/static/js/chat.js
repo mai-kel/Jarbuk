@@ -20,9 +20,7 @@ function message_received(data){
     let main_chat_type = main_chat_div.getAttribute("data-chat_type");
     let main_chat_pk = main_chat_div.getAttribute("data-chat_pk");
     const messages_div = document.getElementById("chat_messages");
-    console.log("rec1")
     if (main_chat_type == data.chat_type && main_chat_pk == data.chat_pk && messages_div != null){
-        console.log("rec2")
         const url =  (data.message_type == "group_message") ? "/chat/group-message/" + data.message_pk + "/" : "/chat/private-message/" + data.message_pk + "/";
         var options = {
             method: 'GET',
@@ -86,8 +84,6 @@ function connect() {
 
 function set_dropwdowns_in_manage_chat(){
     document.querySelectorAll(".manage_user_dropdown_button").forEach(element => element.addEventListener('click', function(){
-        console.log(element.parentNode.querySelector(".dropdown-content"));
-        console.log(element.parentNode.querySelector(".dropdown-content").classList);
         element.parentNode.querySelector(".dropdown-content").classList.toggle("show");
     }));
 
@@ -419,7 +415,6 @@ function set_chat_links(main_chat_div){
 
     if (main_chat_div.querySelector("#chat_info_button") != null){
         main_chat_div.querySelector("#chat_info_button").addEventListener('click', function(){
-            console.log("chat info button clicked");
             const url_chat_info = "/chat/group-chat-info/" + chat_pk + "/";
             fetch(url_chat_info, options).then(response => response.json()).then(data => {
                 if (data["status"] === "ok"){
@@ -434,7 +429,6 @@ function set_chat_links(main_chat_div){
 
     if (main_chat_div.querySelector("#add_users_button") != null){
         main_chat_div.querySelector("#add_users_button").addEventListener('click', function(){
-            console.log("add users button clicked");
             const url_add_users = "/chat/group-chat-add-users/" + chat_pk + "/";
             fetch(url_add_users, options).then(response => response.json()).then(data => {
                 if (data['status'] != "error"){
@@ -506,7 +500,6 @@ function change_view_to_manage_chat(main_chat_div){
 
 
 function chat_form_submit(event){
-    console.log('??????')
     event.preventDefault();
     const message_input = document.getElementById("message_input");
     const message = message_input.value;
@@ -514,13 +507,13 @@ function chat_form_submit(event){
     var chat_type = document.getElementById("main_chat").getAttribute("data-chat_type");
 
     const data = {
+        "event": "new_message",
         "message": message,
         "chat_pk": chat_pk,
         "chat_type": chat_type
     }
 
     console.log(data);
-    console.log(chatSocket);
 
     chatSocket.send(JSON.stringify(data));
     message_input.value = "";
@@ -626,13 +619,17 @@ function set_create_chat_form(){
         then(response => response.json()).
         then(data => {
             if (data['status'] === "ok"){
+                const wewb_scoket_data = {
+                    "event": "chat_created",
+                    "chat_pk": data['chat_pk'],
+                }
+                chatSocket.send(JSON.stringify(wewb_scoket_data));
                 let chats_list = document.getElementById("chats_list");
                 chats_list.insertAdjacentHTML('beforeend', data['rendered_template']);
                 let new_chat_element = chats_list.querySelector(`.chat_element[data-chat_pk="${data['chat_pk']}"][data-chat_type="group_chat"]`);
                 new_chat_element.addEventListener('click', function(){
                     set_chosen_chat(document.getElementById("main_chat"), "group_chat", data['chat_pk']);
                 });
-                window.location.reload(); // TEMPORARY SOLUTION
                 set_chosen_chat(document.getElementById("main_chat"), "group_chat", data['chat_pk']);
             }
         });

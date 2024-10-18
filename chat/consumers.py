@@ -35,12 +35,12 @@ class ChatConsumer(WebsocketConsumer):
             )
 
 
-    def receive(self, text_data):
-        text_data_json = json.loads(text_data)
+    def _receive_new_message(self, text_data_json):
         message = text_data_json.get("message")
         chat_pk = text_data_json.get("chat_pk")
         chat_type = text_data_json.get("chat_type")
         group_name = f"{chat_type}_{chat_pk}"
+
         if message.strip() == "":
             self.send(text_data=json.dumps({"status": "error",
                                             "message": "Message cannot be empty"}))
@@ -85,6 +85,44 @@ class ChatConsumer(WebsocketConsumer):
                                    "message_type": message_type,
                                    "message_pk": message_pk}
         )
+
+
+    def _receive_chat_created(self, text_data_json):
+        chat_pk = text_data_json.get("chat_pk")
+        try:
+            chat = GroupChat.objects.get(pk=chat_pk)
+        except:
+            self.send(text_data=json.dumps({"status": "error",
+                                            "message": "Chat does not exist"}))
+            return
+        if self.user not in chat.participants.all():
+            self.send(text_data=json.dumps({"status": "error",
+                                            "message": "You are not a participant of this chat"}))
+            return
+        new_group_name = f"group_chat_{chat.pk}"
+        if new_group_name not in self.groups:
+            self.groups.append(new_group_name)
+            async_to_sync(self.channel_layer.group_add)(
+                new_group_name, self.channel_name
+            )
+            self.send(text_data=json.dumps({"status": "ok",
+                                            "message": "Group added"}))
+        else:
+            self.send(text_data=json.dumps({"status": "error",
+                                            "message": "Group already added"}))
+
+
+    def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        event = text_data_json.get("event")
+        if event == "chat_created":
+            self._receive_chat_created(text_data_json)
+        elif event == "new_message":
+            self._receive_new_message(text_data_json)
+        else:
+            self.send(text_data=json.dumps({"status": "error",
+                                            "message": "Invalid event"}))
+
 
 
     def chat_message(self, event):
