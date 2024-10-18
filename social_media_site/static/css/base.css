@@ -134,7 +134,11 @@ h1 {
   }
 
 
-
+#registration_complete_wrapper {
+  padding-top: 20px;
+  padding-left: 20px;
+  font-size: 20x;
+}
 
 
 /* PROFILE */
