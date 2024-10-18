@@ -37,22 +37,44 @@ class ChatConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
-        chat_pk = text_data_json["chat_pk"]
-        chat_type = text_data_json["chat_type"]
+        message = text_data_json.get("message")
+        chat_pk = text_data_json.get("chat_pk")
+        chat_type = text_data_json.get("chat_type")
         group_name = f"{chat_type}_{chat_pk}"
+        if message.strip() == "":
+            self.send(text_data=json.dumps({"status": "error",
+                                            "message": "Message cannot be empty"}))
+            return
 
         if chat_type == "private_chat":
             message_type = "private_message"
-            chat = self.user.private_chats.get(pk=chat_pk)
+            try:
+                chat = self.user.private_chats.get(pk=chat_pk)
+            except:
+                self.send(text_data=json.dumps({"status": "error",
+                                                "message": "Chat does not exist"}))
+                return
             new_message = PrivateMessage.objects.create(destination=chat, author=self.user, text=message)
             message_pk = new_message.pk
+
         elif chat_type == "group_chat":
-            chat = self.user.group_chats.get(pk=chat_pk)
             message_type = "group_message"
+            try:
+                chat = self.user.group_chats.get(pk=chat_pk)
+            except:
+                self.send(text_data=json.dumps({"status": "error",
+                                                "message": "Chat does not exist"}))
+                return
             new_message = GroupMessage.objects.create(destination=chat, author=self.user, text=message)
             message_pk = new_message.pk
+        else:
+            self.send(text_data=json.dumps({"status": "error",
+                                            "message": "Invalid chat type"}))
+            return
+
         author_name = self.user.first_name + " " + self.user.last_name
+        self.send(text_data=json.dumps({"status": "ok",
+                                        'message': "Message sent"}))
         async_to_sync(self.channel_layer.group_send)(
             group_name, {"type": "chat.message",
                                    "message": escape(defaultfilters.truncatechars(message, 30)),
@@ -63,7 +85,6 @@ class ChatConsumer(WebsocketConsumer):
                                    "message_type": message_type,
                                    "message_pk": message_pk}
         )
-
 
 
     def chat_message(self, event):
