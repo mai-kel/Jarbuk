@@ -1,0 +1,32 @@
+{% load thumbnail %}
+{% load static %}
+
+
+<link href="{% static "css/add_user_to_chat.css" %}" rel="stylesheet">
+
+
+<div id="add_user_to_wrapper">
+    <div id="return_to_messages">
+        <button id="return_to_messages_button"> Return to messages </button>
+    </div>
+
+    <div id=add_user_to_chat_content>
+       <div id="add_user_to_chat_label">
+           Add users to chat
+       </div>
+
+       {% if addable_users %}
+            <div id="look_for_user">
+                <input type="text" id="search_user" placeholder="Search user">
+            </div>
+       {% endif %}
+
+       <div id="users_to_add_list">
+            {% for user in addable_users %}
+                {% include 'chat/user_chat_add.html' with user=user %}
+            {% empty %}
+                There are no friends you can add to this chat
+            {% endfor %}
+       </div>
+    </div>
+</div

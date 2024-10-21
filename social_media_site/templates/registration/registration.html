@@ -5,6 +5,9 @@
 
     <div class="registration_form">
         <form action="{% url 'site:register' %}" method="post" enctype="multipart/form-data">
+            {% comment %} Necessary for firefox to not autocomplete {% endcomment %}
+            <input type="text" style="display:none">
+            <input type="password" style="display:none">
             {{ form.as_p }}
             {% csrf_token %}
             <p><input type="submit" value="Register"></p>

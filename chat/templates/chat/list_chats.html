@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% load get_chat_name %}
+{% load get_chat_type %}
+{% load static %}
+
+{% block content %}
+
+    <script src="{% static 'js/chat.js' %}"></script>
+    <link href="{% static "css/chat.css" %}" rel="stylesheet">
+
+    <div id="chat_content_wrapper">
+        <div id="chats_list">
+            <div id="create_chat_div">
+                <button type="button" id="create_chat_button"> Create chat </button>
+            </div>
+            {% for chat, message in chats_with_messages %}
+                {% include 'chat/chat_element.html' %}
+            {% endfor %}
+        </div>
+
+        <div id="main_chat"> </div>
+    </div>
+
+{% endblock %}
+

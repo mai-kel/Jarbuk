@@ -2,15 +2,23 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+    height: 100vh;
 }
 
 #header {
     background-color: #333;
     color: #fff;
-    padding: 10px;
+    /* padding: 10px; */
     display: flex;
     justify-content: space-between;
     align-items: center;
+    /* position: sticky;
+    top: 0;
+    z-index: 999; */
+    height: 50px;
+    padding-left: 10px;
+    padding-right: 10px;
+    /* margin-bottom: 20px; */
 }
 
 .logo a {
@@ -60,7 +68,9 @@ body {
 }
 
 #content {
-    margin: 20px;
+    /* margin: 20px; */
+    height: calc(100% - 50px);
+    overflow-y: auto;
 }
 
 h1 {
@@ -109,13 +119,12 @@ h1 {
     background-color: #0056b3;
   }
 
-  #register_link_span {
+  #register_link_span, #reset_password_span {
     display: block;
-    text-align: center;
     margin-top: 10px;
   }
 
-  #register_link {
+  #register_link, #reset_password_link {
     color: #007bff;
     text-decoration: none;
   }
@@ -125,7 +134,11 @@ h1 {
   }
 
 
-
+#registration_complete_wrapper {
+  padding-top: 20px;
+  padding-left: 20px;
+  font-size: 20x;
+}
 
 
 /* PROFILE */
@@ -245,7 +258,7 @@ h1 {
 }
 
 /* Style for the like count */
-.post_likes {
+.post_likes, .comment_likes {
     font-size: 16px;
     color: #5a81b4;
     margin-bottom: 5px;
@@ -311,13 +324,14 @@ h1 {
 
 .pagination {
   text-align: center;
-  margin-top: 20px;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 
 .step-links {
   display: inline-block;
   border: 1px solid #ccc;
-  padding: 5px 10px;
+  padding: 15px 20px;
   border-radius: 5px;
 }
 
@@ -350,6 +364,7 @@ h1 {
     margin: auto;
     border: 3px solid #ddd;
     text-align: center;
+    margin-top: 20px;
 }
 
 .comment_container {
@@ -406,6 +421,7 @@ h1 {
     border-radius: 10px;
     color: #fff;
     padding: 5px;
+    cursor: pointer;
 }
 
 #submit_comment:hover {
@@ -471,160 +487,170 @@ h1 {
 
 
 
-  /* INVITATIONS SENT */
-  .recipient_container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-  }
+/* INVITATIONS SENT */
+.invitations_list{
+    padding-top: 20px;
+    padding-left: 20px;
+}
 
-  .recipient_profile_photo_wrapper {
-    margin-right: 10px;
-  }
+.recipient_container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
 
-  .user_profile_photo {
-    width: 100px; /* Adjust as needed */
-    height: 100px; /* Adjust as needed */
-    border-radius: 50%;
-  }
+.recipient_profile_photo_wrapper {
+  margin-right: 10px;
+}
 
-  .recipient_name {
-    margin-right: 10px;
-  }
+.user_profile_photo {
+  width: 100px; /* Adjust as needed */
+  height: 100px; /* Adjust as needed */
+  border-radius: 50%;
+}
 
-  .recipient_name a {
-    color: #333;
-    text-decoration: none;
-  }
+.recipient_name {
+  margin-right: 10px;
+}
 
-  .recipient_name a:hover {
-    text-decoration: underline;
-  }
+.recipient_name a {
+  color: #333;
+  text-decoration: none;
+}
 
-  .withdraw_invitation_container p {
-    margin: 0;
-  }
+.recipient_name a:hover {
+  text-decoration: underline;
+}
 
-  .withdraw_invitation_container input[type="submit"] {
-    background-color: #555;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
+.withdraw_invitation_container p {
+  margin: 0;
+}
 
-  .withdraw_invitation_container input[type="submit"]:hover {
-    background-color: #777c81
-  }
+.withdraw_invitation_container input[type="submit"] {
+  background-color: #555;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.withdraw_invitation_container input[type="submit"]:hover {
+  background-color: #777c81
+}
 
 
 /* FRIENDS LIST */
+.friends_list {
+  padding-top: 20px;
+  padding-left: 20px;
+}
+
 .friend_container {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
   }
 
-  .friend_profile_photo_wrapper {
-    margin-right: 10px;
-  }
+.friend_profile_photo_wrapper {
+  margin-right: 10px;
+}
 
-  .friend_profile_photo {
-    width: 100px; /* Adjust as needed */
-    height: 100px; /* Adjust as needed */
-    border-radius: 50%;
-  }
+.friend_profile_photo {
+  width: 100px; /* Adjust as needed */
+  height: 100px; /* Adjust as needed */
+  border-radius: 50%;
+}
 
-  .friend_name {
-    margin-right: 10px;
-  }
+.friend_name {
+  margin-right: 10px;
+}
 
-  .friend_name a {
-    color: #333;
-    text-decoration: none;
-  }
+.friend_name a {
+  color: #333;
+  text-decoration: none;
+}
 
-  .friend_name a:hover {
-    text-decoration: underline;
-  }
+.friend_name a:hover {
+  text-decoration: underline;
+}
 
-  .delete_friend p {
-    margin: 0;
-  }
+.delete_friend p {
+  margin: 0;
+}
 
-  .delete_friend input[type="submit"] {
-    background-color: #555;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
+.delete_friend input[type="submit"] {
+  background-color: #555;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
 
-  .delete_friend input[type="submit"]:hover {
-    background-color: #777c81; /* Adjust as needed */
-  }
+.delete_friend input[type="submit"]:hover {
+  background-color: #777c81; /* Adjust as needed */
+}
 
 
 
-  /* INVITATIONS RECEIVED */
-  .sender_container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-  }
+/* INVITATIONS RECEIVED */
+.sender_container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
 
-  .sender_profile_photo_wrapper {
-    margin-right: 10px;
-  }
+.sender_profile_photo_wrapper {
+  margin-right: 10px;
+}
 
-  .user_profile_photo {
-    width: 100px; /* Adjust as needed */
-    height: 100px; /* Adjust as needed */
-    border-radius: 50%;
-  }
+.user_profile_photo {
+  width: 100px; /* Adjust as needed */
+  height: 100px; /* Adjust as needed */
+  border-radius: 50%;
+}
 
-  .sender_name {
-    margin-right: 10px;
-  }
+.sender_name {
+  margin-right: 10px;
+}
 
-  .sender_name a {
-    color: #333;
-    text-decoration: none;
-  }
+.sender_name a {
+  color: #333;
+  text-decoration: none;
+}
 
-  .sender_name a:hover {
-    text-decoration: underline;
-  }
+.sender_name a:hover {
+  text-decoration: underline;
+}
 
-  .accept_invitation_container p,
-  .decline_invitation_container p {
-    margin: 0;
-  }
+.accept_invitation_container p,
+.decline_invitation_container p {
+  margin: 0;
+}
 
-  .accept_invitation_container input[type="submit"],
-  .decline_invitation_container input[type="submit"] {
-    background-color: #555; /* Adjust as needed */
-    color: #fff;
-    border: none;
-    padding: 10px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-left: 5px;
-  }
+.accept_invitation_container input[type="submit"],
+.decline_invitation_container input[type="submit"] {
+  background-color: #555; /* Adjust as needed */
+  color: #fff;
+  border: none;
+  padding: 10px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 5px;
+}
 
-  .accept_invitation_container input[type="submit"]:hover,
-  .decline_invitation_container input[type="submit"]:hover {
-    background-color: #777c81; /* Adjust as needed */
-  }
+.accept_invitation_container input[type="submit"]:hover,
+.decline_invitation_container input[type="submit"]:hover {
+  background-color: #777c81; /* Adjust as needed */
+}
 
 
 
   /* USERS LIST */
   .search_form {
     width: 60%;
-    margin: 20px auto;
+    margin: auto;
     padding: 20px;
     border-radius: 10px;
     background-color: #f8f9fa;

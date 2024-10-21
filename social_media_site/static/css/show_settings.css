@@ -1,0 +1,85 @@
+/* Wrapper for the whole settings page */
+#show_settings_content_wrapper {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 20px;
+    gap: 20px; /* Space between the settings list and the content */
+    flex-wrap: nowrap; /* Prevent wrapping under normal circumstances */
+}
+
+/* Settings List (Left Side) */
+#settings_list_div {
+    width: 300px; /* Fixed width for the settings menu */
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    height: 100%;
+}
+
+#settings_list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#settings_list li {
+    margin-bottom: 10px;
+}
+
+#settings_list li a {
+    text-decoration: none;
+    color: #007BFF; /* Blue link color */
+    font-weight: bold;
+    display: block;
+    padding: 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#settings_list li a:hover {
+    background-color: #e9ecef;
+    color: #0056b3;
+}
+
+/* Content Area (Right Side) */
+#settings_content_div {
+    flex-grow: 1; /* Content will take the remaining space */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    min-height: 400px; /* Ensures some height even if content is small */
+    width: calc(100% - 320px); /* Takes up space remaining after menu width */
+    max-width: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #show_settings_content_wrapper {
+        flex-direction: column; /* Stack vertically on small screens */
+    }
+
+    #settings_list_div {
+        width: 100%; /* Full-width for the settings menu */
+        margin-bottom: 20px; /* Add some space between menu and content */
+    }
+
+    #settings_content_div {
+        width: 100%; /* Full-width for the content on small screens */
+    }
+}
+
+/* Optional styles for headings and paragraphs within the content */
+#settings_content_div h1 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+#settings_content_div p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}

@@ -29,6 +29,7 @@ ALLOWED_HOSTS = []
 
 # Application definition
 INSTALLED_APPS = [
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -36,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'social_media_site.apps.SocialMediaSiteConfig',
+    'chat.apps.ChatConfig',
     'easy_thumbnails',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -67,16 +70,32 @@ TEMPLATES = [
     },
 ]
 
+
+
 WSGI_APPLICATION = 'jarbuk.wsgi.application'
 
+# Channels
+ASGI_APPLICATION = "jarbuk.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'db',
+        'PORT': '5432',
     }
 }
 
@@ -136,6 +155,19 @@ THUMBNAIL_ALIASES = {
         'profile_pp': {'size': (0, 300), 'crop': False},
         'profile_cp': {'size': (1400, 0), 'crop': False},
         'post_photo': {'size': (0, 600), 'crop': False},
-        'friend_pp': {'size': (0, 300), 'crop': False}
+        'friend_pp': {'size': (0, 300), 'crop': False},
+        'edit_profile_pp': {'size': (0, 400), 'crop': False},
+        'edit_profile_cp': {'size': (600, 0), 'crop': False},
+        'msg_pp': {'size': (50, 0), 'crop': False},
+        'chat_image_info': {'size': (0, 300), 'crop': False},
+        'chat_user_pp': {'size': (0, 150), 'crop': False},
+        'chat_image': {'size': (0, 150), 'crop': False},
     },
 }
+
+
+AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend",
+                           "social_media_site.backends.EmailAuthBackend"
+                           ]
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

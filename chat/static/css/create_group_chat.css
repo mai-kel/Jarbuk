@@ -1,0 +1,88 @@
+#create_chat_form_wrapper {
+    min-width: 800px;
+    max-width: 1200px; /* Increased width */
+    margin: 0 auto;
+    padding: 40px 20px 20px; /* Added padding on top */
+    background-color: #f9f9f9;
+    border-radius: 8px; /* Removed border, kept border-radius for shape */
+}
+
+#create_chat_form p {
+    margin-bottom: 24px; /* Increased bottom margin */
+}
+
+#create_chat_form label {
+    display: block;
+    font-size: 18px; /* Increased label font size */
+    font-weight: 500;
+    margin-bottom: 10px; /* Increased space below label */
+    color: #333;
+}
+
+#create_chat_form input[type="text"],
+#create_chat_form select,
+#create_chat_form input[type="file"] {
+    width: 100%;
+    padding-top: 14px; /* Increased input padding */
+    padding-bottom: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px; /* Increased input font size */
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+
+#create_chat_form input[type="text"]:focus,
+#create_chat_form select:focus,
+#create_chat_form input[type="file"]:focus {
+    border-color: #66afe9;
+    outline: none;
+}
+
+#create_chat_form select {
+    height: 150px;
+    padding: 14px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    resize: none; /* Disabled resizing */
+}
+
+#create_chat_form input[type="file"] {
+    border: none;
+}
+
+#create_chat_form input[type="submit"] {
+    width: 100%;
+    background-color: #555; /* Updated to #555 */
+    color: white;
+    padding: 14px 20px; /* Increased button padding */
+    border: none;
+    border-radius: 4px;
+    font-size: 18px; /* Increased button font size */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#create_chat_form input[type="submit"]:hover {
+    background-color: #777c81; /* Changed hover color to #777c81 */
+}
+
+#create_chat_form #id_participants {
+    height: auto;
+    max-height: 200px;
+    overflow-y: scroll;
+}
+
+@media (max-width: 768px) {
+    #create_chat_form_wrapper {
+        padding: 30px 15px; /* Adjusted padding for mobile */
+    }
+
+    #create_chat_form label {
+        font-size: 16px; /* Smaller label size for mobile */
+    }
+
+    #create_chat_form input[type="submit"] {
+        font-size: 16px; /* Smaller button font size for mobile */
+    }
+}

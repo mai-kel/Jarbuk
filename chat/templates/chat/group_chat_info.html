@@ -1,0 +1,70 @@
+{% load thumbnail %}
+{% load static %}
+
+
+<link href="{% static "css/chat_info.css" %}" rel="stylesheet">
+
+<div id="group_chat_info_wrapper">
+    <div id="return_to_messages">
+        <button id="return_to_messages_button"> Return to messages </button>
+    </div>
+
+    <div id=information_content>
+        <div id="group_image_name_wrapper">
+            <div id="group_chat_image">
+                {% if chat.group_image %}
+                    <img class="chat_image" src="{{chat.group_image|thumbnail_url:'chat_image_info'}}">
+                {% else %}
+                    <img class="chat_image" src="{% static 'default_img/group_chat_def.png' %}">
+                {% endif %}
+            </div>
+
+            <div id="group_chat_name">
+                {{chat.name}}
+            </div>
+        </div>
+
+        <div id="chat_owner">
+            <div id="chat_owner_label">
+                Chat owner:
+            </div>
+            <div id="chat_owner_div">
+                {% include 'chat/user_chat_info.html' with user=chat.owner %}
+            </div>
+        </div>
+
+        <div id="admins_participants_wrapper">
+            <div id="chat_admins">
+                <div id="chat_admins_label">
+                    Chat admins:
+                </div>
+                <div id="chat_admins_wrapper">
+                    {% for admin in chat.admins.all %}
+                        <div class="chat_admin_div">
+                            {% include 'chat/user_chat_info.html' with user=admin %}
+                        </div>
+                    {% empty %}
+                        There are no admins
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div id="rest_participants">
+                <div id="rest_participants_label">
+                    Rest participants:
+                </div>
+                <div id="rest_participants_list">
+                    {% for participant in rest_participants %}
+                        <div class="participant_div">
+                            {% include 'chat/user_chat_info.html' with user=participant %}
+                        </div>
+                    {% empty %}
+                        There aren't any other participants
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div
+

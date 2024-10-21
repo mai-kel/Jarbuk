@@ -1,0 +1,100 @@
+{% extends "site/settings/show_settings.html" %}
+{% load static %}
+{% load thumbnail %}
+
+{% block settings_content %}
+    <link href="{% static "css/edit_profile.css" %}" rel="stylesheet">
+
+    <div id="edit_profile_content_wrapper">
+        <div id="edit_profile_form_wrapper">
+            <form method="post" action="{% url 'site:edit_profile' %}" enctype='multipart/form-data'>
+                {% csrf_token %}
+                <div id="first_name_form">
+                    <div id=first_name_label>
+                        First name:
+                    </div>
+                    <div id="first_name_input">
+                        {{form.first_name}}
+                    </div>
+                    <div class="element_error">
+                        {{form.first_name.errors}}
+                    </div>
+                </div>
+
+                <div id="last_name_form">
+                    <div id=last_name_label>
+                        Last name:
+                    </div>
+                    <div id="last_name_input">
+                        {{form.last_name}}
+                    </div>
+                    <div class="element_error">
+                        {{form.last_name.errors}}
+                    </div>
+                </div>
+
+                <div id="date_of_birth_form">
+                    <div id=date_of_birth_label>
+                        Date of birth:
+                    </div>
+                    <div id="date_of_birth_input">
+                        {{form.date_of_birth}}
+                    </div>
+                    <div class="element_error">
+                        {{form.date_of_birth.errors}}
+                    </div>
+                </div>
+
+                <div id="profile_photo_form">
+                    <div id=profile_photo_label>
+                        Profile photo:
+                    </div>
+                    <div id="profile_photo_current_wrapper">
+                        {% if request.user.profile.profile_photo %}
+                            <img src="{{request.user.profile.profile_photo|thumbnail_url:'edit_profile_pp'}}" id="profile_photo_current">
+                        {% else %}
+                            <img src="{% static 'default_img/profile_def.png' %}" id="profile_photo_current">
+                        {% endif %}
+                    </div>
+                    <div id="profile_photo_input">
+                        {{form.profile_photo}}
+                    </div>
+                    <div class="element_error">
+                        {{form.profile_photo.errors}}
+                    </div>
+                </div>
+
+                <div id="cover_photo_form">
+                    <div id=cover_photo_label>
+                        Cover photo:
+                    </div>
+                    <div id="cover_photo_current_wrapper">
+                        {% if request.user.profile.profile_photo %}
+                            <img src="{{request.user.profile.cover_photo|thumbnail_url:'edit_profile_cp'}}" id="cover_photo_current">
+                        {% else %}
+                            <img src="{% static 'default_img/cover_def.png' %}" id="cover_photo_current">
+                        {% endif %}
+                    </div>
+                    <div id="cover_photo_input">
+                        {{form.cover_photo}}
+                    </div>
+                    <div class="element_error">
+                        {{form.cover_photo.errors}}
+                    </div>
+                </div>
+
+                <div class="form_non_field_errors">
+                    <ul class="non_field_error_list">
+                        {% if form.non_field_errors %}
+                            <li>{{ form.non_field_errors }}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <div id="submit_wrapper">
+                    <button type="submit">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

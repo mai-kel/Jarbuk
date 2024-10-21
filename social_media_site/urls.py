@@ -1,10 +1,11 @@
-from django.urls import path
+from django.urls import path, reverse_lazy
 from django.contrib.auth import views as auth_views
 from . import views
 
 app_name = 'social_media_site'
 
 urlpatterns = [
+    path('', views.posts_feed, name='posts_feed'),
     path('login/', auth_views.LoginView.as_view(redirect_authenticated_user=True), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('register/', views.register, name='register'),
@@ -36,5 +37,32 @@ urlpatterns = [
     path('friends/invitations-received/decline/<int:id>/', views.invitations_received_decline,
          name='invitations_received_decline'),
     path('posts/page/<int:page>/', views.posts_feed, name='posts_feed_page'),
-    path('', views.posts_feed, name='posts_feed'),
+    path('settings/', views.show_settings, name='show_settings'),
+    path('settings/edit-profile', views.edit_profile, name='edit_profile'),
+    path('settings/change-password',
+         auth_views.PasswordChangeView.as_view(template_name='site/settings/change_password.html',
+                                               success_url=reverse_lazy('site:change_password_done')),
+         name='change_password'),
+     path('settings/change-password/done',
+          auth_views.PasswordChangeDoneView.as_view(template_name='site/settings/change_password_done.html'),
+          name='change_password_done'),
+     path('settings/change-username/', views.change_username, name='change_username'),
+     path('settings/change-username/done/', views.change_username_done, name='change_username_done'),
+     path('settings/change-email/', views.change_email, name='change_email'),
+     path('settings/change-email/done/', views.change_email_done, name='change_email_done'),
+     path('password-reset/', auth_views.PasswordResetView.as_view(template_name='site/password_reset/password_reset.html',
+                                                                 email_template_name='site/password_reset/password_reset_email.html',
+                                                                 subject_template_name='site/password_reset/password_reset_subject.txt',
+                                                                 success_url=reverse_lazy('site:password_reset_done')),
+          name='password_reset'),
+     path('password-reset/done', auth_views.PasswordResetDoneView.as_view(template_name='site/password_reset/password_reset_done.html'),
+          name='password_reset_done'),
+     path('password-reset-confirm/<uidb64>/<token>/',
+          auth_views.PasswordResetConfirmView.as_view(template_name='site/password_reset/password_reset_confirm.html',
+                                                      success_url=reverse_lazy('site:password_reset_complete')),
+          name='password_reset_confirm'),
+     path('password-reset-complete/',
+          auth_views.PasswordResetCompleteView.as_view(template_name='site/password_reset/password_reset_complete.html'),
+          name='password_reset_complete'),
+
 ]

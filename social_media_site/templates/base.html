@@ -17,7 +17,6 @@
             </span>
             {% if request.user.is_authenticated %}
                 <div id='top_menu'>
-                    <!-- TODO make menu item for logged users (profile, chat etc.) -->
                     <ul class="menu">
                     <li>
                         <a href="{% url 'site:posts_feed'%}">Posts</a>
@@ -41,6 +40,14 @@
 
                     <li>
                         <a href="{% url 'site:user_detail' id=request.user.pk%}">My profile</a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'chat:list_chats' %}">Chat</a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'site:show_settings' %}">Settings</a>
                     </li>
                 </div>
 

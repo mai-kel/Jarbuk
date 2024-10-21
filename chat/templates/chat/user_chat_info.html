@@ -1,0 +1,16 @@
+{% load thumbnail %}
+{% load static %}
+
+<div class="chat_user">
+    <div class="chat_user_image">
+        {% if user.profile.profile_photo %}
+            <img class="chat_user_pp" src="{{user.profile.profile_photo|thumbnail_url:'chat_user_pp'}}">
+        {% else %}
+            <img class="chat_user_pp" src="{% static 'default_img/profile_def.png' %}">
+        {% endif %}
+    </div>
+
+    <div class="chat_user_name">
+        <a href="{% url 'site:user_detail' user.pk %}">{{user.first_name}} {{user.last_name}}</a>
+    </div>
+</div>

@@ -1,0 +1,54 @@
+{% extends "site/settings/show_settings.html" %}
+{% load static %}
+{% load thumbnail %}
+
+{% block settings_content %}
+    <link href="{% static "css/change_settings.css" %}" rel="stylesheet">
+
+    <div class="change_settings_content_wrapper">
+        <div class="change_settings_form_wrapper">
+            <div class="current_setting_value_div">
+                Current username: {{request.user.username}}
+            </div>
+            <form method="post" action="{% url 'site:change_username' %}" enctype='multipart/form-data'>
+                {% csrf_token %}
+                <div class="element_form">
+                    <div class=element_label>
+                        Current password:
+                    </div>
+                    <div class="element_input">
+                        {{form.current_password}}
+                    </div>
+                    <div class="element_error">
+                        {{form.current_password.errors}}
+                    </div>
+                </div>
+
+                <div class="element_form">
+                    <div class=element_label>
+                        New username:
+                    </div>
+                    <div class="element_input">
+                        {{form.new_username}}
+                    </div>
+                    <div class="element_error">
+                        {{form.new_username.errors}}
+                    </div>
+                </div>
+
+                <div class="form_non_field_errors">
+                    <ul class="non_field_error_list">
+                        {% if form.non_field_errors %}
+                            <li>{{ form.non_field_errors }}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <div class="submit_wrapper">
+                    <button type="submit">Save</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+{% endblock %}

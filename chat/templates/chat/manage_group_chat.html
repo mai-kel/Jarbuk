@@ -1,0 +1,103 @@
+{% load thumbnail %}
+{% load static %}
+
+
+<link href="{% static "css/manage_chat.css" %}" rel="stylesheet">
+
+<div id="manage_chat_wrapper">
+    <div id="return_to_messages">
+        <button id="return_to_messages_button" type="button"> Return to messages </button>
+    </div>
+
+    <div id="manage_chat_content">
+        <div id="manage_name_and_image">
+            <div id="name_and_image_form_wrapper">
+                <div id="image_form_div">
+                    <form id="image_form" method="post" enctype="multipart/form-data">
+                        <div id=current_image_label>
+                            Current image
+                        </div>
+                        {% if chat.group_image %}
+                            <div id="current_group_image_div">
+                                <img id="chat_image_manage_chat" class="chat_image" src="{{chat.group_image|thumbnail_url:'chat_image_info'}}">
+                            </div>
+                        {% else %}
+                            <div id="current_group_image_div">
+                                <img id="chat_image_manage_chat" class="chat_image" src="{% static 'default_img/group_chat_def.png' %}">
+                            </div>
+                        {% endif %}
+                        <div id="file_input_div">
+                            <input type="file" name="group_image" accept="image/*" id="id_group_image_input">
+                        </div>
+                        <div id="image_submit_div">
+                            <input type="submit" value="Save changes">
+                        </div>
+                    </form>
+                </div>
+
+                <div id="name_form_div">
+                    <form id="name_form" method="post">
+                        <div id="group_name_label">
+                            Group name
+                        </div>
+                        <div id="group_name_input_div">
+                            <input type="text" name="group_name" value="{{chat.name}}" id="id_group_name_input">
+                        </div>
+                        <div id="name_submit_div">
+                            <input type="submit" value="Save changes">
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="chat_owner">
+            <div id="chat_owner_label">
+                Chat owner:
+            </div>
+            <div id="chat_owner_div">
+                {% include 'chat/user_chat_manage.html' with user=chat.owner logged_user_role=role rendered_user_role='owner' %}
+            </div>
+        </div>
+
+        <div id="admins_participants_wrapper">
+            <div id="chat_admins">
+                <div id="chat_admins_label">
+                    Chat admins:
+                </div>
+                <div id="chat_admins_wrapper">
+                    {% for admin in chat.admins.all %}
+                        <div class="chat_admin_div">
+                            {% include 'chat/user_chat_manage.html' with user=admin logged_user_role=role rendered_user_role='admin' %}
+                        </div>
+                    {% empty %}
+                        There are no admins
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div id="rest_participants">
+                <div id="rest_participants_label">
+                    Rest participants:
+                </div>
+                <div id="rest_participants_list">
+                    {% for participant in rest_participants %}
+                        <div class="participant_div">
+                            {% include 'chat/user_chat_manage.html' with user=participant logged_user_role=role rendered_user_role='participant' %}
+                        </div>
+                    {% empty %}
+                        There aren't any other participants
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {% if role == "owner" %}
+            <div id="remove_group_div">
+                <button id="remove_group_button" type="button"> Remove group </button>
+            </div>
+        {% endif %}
+    </div>
+</div
+
