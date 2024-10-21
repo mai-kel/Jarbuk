@@ -16,6 +16,7 @@ class ChatConsumer(WebsocketConsumer):
         group_chats = self.user.group_chats.all()
 
         self.groups = []
+        self.groups.append(f"user_{self.user.pk}")
         for chat in private_chats:
             self.groups.append(f"private_chat_{chat.pk}")
         for chat in group_chats:
@@ -124,6 +125,18 @@ class ChatConsumer(WebsocketConsumer):
                                             "message": "Invalid event"}))
 
 
-
     def chat_message(self, event):
         self.send(text_data=json.dumps(event))
+
+
+    def left_chat(self, event):
+        chat_pk = event.get("chat_pk")
+        chat_type = 'group_chat'
+        chat = GroupChat.objects.filter(pk=chat_pk).first()
+        if chat and self.user not in chat.participants.all():
+            self.groups.remove(f"{chat_type}_{chat_pk}")
+            async_to_sync(self.channel_layer.group_discard)(
+                f"{chat_type}_{chat_pk}", self.channel_name
+            )
+            self.send(text_data=json.dumps({"chat_pk": chat_pk,
+                                            "event": "left_chat"}))

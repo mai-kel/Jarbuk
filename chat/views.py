@@ -10,6 +10,9 @@ from django.http import JsonResponse
 from .forms import GroupChatForm
 from django.contrib import messages
 from easy_thumbnails.files import get_thumbnailer
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+import json
 
 
 @require_http_methods(['GET'])
@@ -234,6 +237,12 @@ def delete_user_from_group_chat_as_admin(chat: GroupChat, user_to_delete: User)-
     return (data, status_code)
 
 
+def send_info_to_consumer(group, data):
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        group, data)
+
+
 @require_http_methods(['POST'])
 @login_required
 def remove_user_from_group_chat(request):
@@ -252,6 +261,10 @@ def remove_user_from_group_chat(request):
         data['status'] = 'error'
         data['message'] = 'You have no permission to delete users from this chat'
         status_code=403
+
+    if status_code == 200:
+        group_name = f"user_{user_to_delete.pk}"
+        send_info_to_consumer(group_name, {'type': 'left.chat', 'chat_pk': chat_pk})
 
     return JsonResponse(data, status=status_code)
 
@@ -342,6 +355,8 @@ def leave_group_chat(request):
         data['status'] = 'ok'
         data['message'] = 'You left the chat'
         status_code=200
+        group_name = f"user_{request.user.pk}"
+        send_info_to_consumer(group_name, {'type': 'left.chat', 'chat_pk': chat_pk})
 
     return JsonResponse(data, status=status_code)
 
