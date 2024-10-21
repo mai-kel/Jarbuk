@@ -42,7 +42,7 @@
         </div>
 
         <div class="like_form_div">
-            <form id="like_form" method="POST" data-postid="{{post.pk}}">
+            <form id="post_like_form" method="POST" data-postid="{{post.pk}}">
                 {% csrf_token %}
                 {% if request.user in post.likes.all %}
                     <p><input class="like_button" type="submit" value="Unlike"></p>
