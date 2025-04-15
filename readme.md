@@ -4,26 +4,12 @@
 
 > ⚠️ **Note:** This project was created for learning purposes only and is not intended for production use. The Django secret key is visible in the settings file for simplicity. If you plan to use this project, **make sure to replace the secret key** for security reasons.
 
-## Table of Contents
-- [Jarbuk](#jarbuk)
-  - [Table of Contents](#table-of-contents)
-  - [Features](#features)
-  - [Tech Stack](#tech-stack)
-  - [Installation and Usage](#installation-and-usage)
-    - [Prerequisites](#prerequisites)
-    - [Running with Docker](#running-with-docker)
-    - [Running without Docker (Optional)](#running-without-docker-optional)
-  - [Security Considerations](#security-considerations)
-  - [Showcase](#showcase)
-  - [License](#license)
-
 ## Features
 
-- Create and interact with posts (like, comment, etc.)
+- Create and interact with posts 
 - Send and accept friend invitations
 - Real-time group and private chat functionality
 - Profile management (edit profile, update login credentials)
-- Group chat creation
 - Notifications for friend requests and message updates
 
 ## Tech Stack
@@ -42,7 +28,6 @@ To get started with Jarbuk, follow the steps below:
 ### Prerequisites
 
 - Docker and Docker Compose installed on your system.
-- Alternatively, Python 3.8+ and Django (if running without Docker).
 
 ### Running with Docker
 
@@ -61,44 +46,6 @@ To get started with Jarbuk, follow the steps below:
     ```bash
     http://localhost:8000
     ```
-
-### Running without Docker (Optional)
-
-If you'd prefer to run the application without Docker, follow these steps:
-
-1. Clone the repository and navigate to the project directory.
-
-2. Set up a virtual environment:
-    ```bash
-    python3 -m venv env
-    source env/bin/activate
-    ```
-
-3. Install the dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4. Run database migrations:
-    ```bash
-    python manage.py migrate
-    ```
-
-5. Start the development server:
-    ```bash
-    python manage.py runserver
-    ```
-
-6. Open your browser and go to:
-    ```bash
-    http://localhost:8000
-    ```
-
-## Security Considerations
-
-- **Django Secret Key:** Always change the `SECRET_KEY` in the Django settings before running in a production environment.
-- **Database:** If using a production-level database, ensure sensitive data such as credentials and keys are stored in environment variables.
-- **SSL:** Consider configuring HTTPS in a production environment to secure data in transit.
 
 ## Showcase
 
